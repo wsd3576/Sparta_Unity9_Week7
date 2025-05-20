@@ -5,8 +5,9 @@ using UnityEngine;
 
 public class UIManager : MonoBehaviour
 {
-    [SerializeField] GameObject _pauseMenu;
-    [SerializeField] GameObject _healthBar;
+    [SerializeField] private GameObject _pauseMenu;
+    public ConditionUI _health;
+    public ConditionUI _stamina;
 
     private void Start()
     {
