@@ -1,29 +1,55 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class UIManager : MonoBehaviour
 {
-    [SerializeField] private GameObject _pauseMenu;
+    [Header("Pause Menu")]
+    [SerializeField] private GameObject pauseMenu;
+    
+    [Header("Object Info")]
+    [SerializeField] private GameObject infoPanel;
+    public GameObject InfoPanel
+    {
+        get{return infoPanel;}
+    }
+    [SerializeField] private TextMeshProUGUI objectNameText;
+    [SerializeField] private TextMeshProUGUI objectDescriptionText;
+    
+    [Header("Conditions")]
     public ConditionUI _health;
     public ConditionUI _stamina;
+
+    private void Awake()
+    {
+        GameManager.Instance.UIManager = this;
+    }
 
     private void Start()
     {
         GameManager.Instance.Player.controller.pauseMenu += TogglePauseMenu;
         TogglePauseMenu();
+        infoPanel.SetActive(false);
     }
 
     public void TogglePauseMenu()
     {
-        if (_pauseMenu.activeInHierarchy)
+        if (pauseMenu.activeInHierarchy)
         {
-            _pauseMenu.SetActive(false);
+            pauseMenu.SetActive(false);
         }
         else
         {
-            _pauseMenu.SetActive(true);
+            pauseMenu.SetActive(true);
         }
+    }
+
+    public void ShowObjectInfo(IInteractable interactable)
+    {
+        infoPanel.SetActive(true); 
+        objectNameText.text = interactable.GetObjectInfo().Item1;
+        objectDescriptionText.text = interactable.GetObjectInfo().Item2;
     }
 }

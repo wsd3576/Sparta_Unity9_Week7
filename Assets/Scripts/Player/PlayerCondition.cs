@@ -29,7 +29,6 @@ public class PlayerCondition : MonoBehaviour, IDamageable
         {
             if (condition.type == type)
             {
-                Debug.unityLogger.Log(condition.type.ToString());
                 return condition;
             }
         }

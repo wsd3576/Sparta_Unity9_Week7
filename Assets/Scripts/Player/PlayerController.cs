@@ -22,6 +22,7 @@ public class PlayerController : MonoBehaviour
     private Rigidbody _rigidbody;
     
     public Action pauseMenu;
+    public Action interaction;
     
     private void Awake()
     {
@@ -98,9 +99,20 @@ public class PlayerController : MonoBehaviour
 
     public void OnEscape(InputAction.CallbackContext context)
     {
-        bool toggle = Cursor.lockState == CursorLockMode.Locked;
-        Cursor.lockState = toggle ? CursorLockMode.None : CursorLockMode.Locked;
-        _canLook = !toggle;
-        pauseMenu?.Invoke();
+        if (context.phase == InputActionPhase.Started)
+        {
+            bool toggle = Cursor.lockState == CursorLockMode.Locked;
+            Cursor.lockState = toggle ? CursorLockMode.None : CursorLockMode.Locked;
+            _canLook = !toggle;
+            pauseMenu?.Invoke();
+        }
+    }
+
+    public void OnInteraction(InputAction.CallbackContext context)
+    {
+        if (context.phase == InputActionPhase.Started)
+        {
+            interaction?.Invoke();
+        }
     }
 }

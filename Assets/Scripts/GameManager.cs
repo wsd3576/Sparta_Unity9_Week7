@@ -36,6 +36,8 @@ public class GameManager : MonoBehaviour
                 Destroy(gameObject);
             }
         }
-        UIManager = gameObject.GetComponent<UIManager>();
+
+        if (Player == null) Player = FindObjectOfType<Player>();
+        if (UIManager == null) UIManager = FindObjectOfType<UIManager>();
     }
 }
