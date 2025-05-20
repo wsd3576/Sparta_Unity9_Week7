@@ -16,9 +16,7 @@ public class JumperObject : MonoBehaviour
             
             if (other.relativeVelocity.y < -1f)
             {
-                Vector3 velocity = _rigidbody.velocity;
-                velocity.y = jumpPower;
-                _rigidbody.velocity = velocity;
+                _rigidbody.AddForce(Vector2.up * (jumpPower), ForceMode.Impulse);
             }
         }
     }
