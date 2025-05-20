@@ -15,7 +15,7 @@ public class ItemObject : MonoBehaviour, IInteractable
 
     public void OnInteractInput()
     {
-        GameManager.Instance.Player.itemData = data;
+        GameManager.Instance.Player.AddItem(data.type, data.amount);
         Destroy(gameObject);
     }
 }

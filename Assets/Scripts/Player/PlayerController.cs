@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -9,6 +10,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float _jumpForce;
     [SerializeField] Vector2 _curMovementInput;
     [SerializeField] LayerMask _groundLayerMask;
+    private float _bonusSpeed = 0f;
+    private float _bonusJumpForce = 0f;
 
     [Header("Look")]
     [SerializeField] Transform _cameraContainer;
@@ -20,6 +23,14 @@ public class PlayerController : MonoBehaviour
     [SerializeField] bool _canLook = true;
     
     private Rigidbody _rigidbody;
+    
+    private Dictionary<string, int> itemButtonMap = new Dictionary<string, int>()
+    {
+        { "1", 1 },
+        { "2", 2 },
+        { "3", 3 },
+        { "4", 4 }
+    };
     
     private void Awake()
     {
@@ -45,7 +56,7 @@ public class PlayerController : MonoBehaviour
     private void Move()
     {
         Vector3 dir = transform.forward * _curMovementInput.y + transform.right * _curMovementInput.x;
-        dir *= _moveSpeed;
+        dir *= _moveSpeed + _bonusSpeed;
         dir.y = _rigidbody.velocity.y;
         
         _rigidbody.velocity = dir;
@@ -76,7 +87,7 @@ public class PlayerController : MonoBehaviour
     {
         if (context.phase == InputActionPhase.Started && IsGrounded())
         {
-            _rigidbody.AddForce(Vector2.up * _jumpForce, ForceMode.Impulse);
+            _rigidbody.AddForce(Vector2.up * (_jumpForce + _bonusJumpForce), ForceMode.Impulse);
         }
     }
     
@@ -110,6 +121,19 @@ public class PlayerController : MonoBehaviour
         if (context.phase == InputActionPhase.Started)
         {
             GameManager.Instance.Player.interaction.OnInteractInput();
+        }
+    }
+
+    public void UseItem(InputAction.CallbackContext context)
+    {
+        var control = context.control;
+
+        string keyName = control.name.ToLower();
+
+        if (itemButtonMap.TryGetValue(keyName, out int value))
+        {
+            Debug.Log($"입력된 버튼: {keyName}, 매핑된 값: {value}");
+            //해당 번호 아이템 사용
         }
     }
 }

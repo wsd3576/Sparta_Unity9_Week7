@@ -9,7 +9,6 @@ public class Player : MonoBehaviour
     public PlayerController controller;
     public PlayerCondition condition;
     public PlayerInteraction interaction;
-    public ItemData itemData;
     
     private void Awake()
     {
@@ -17,5 +16,22 @@ public class Player : MonoBehaviour
         controller = GetComponent<PlayerController>();
         condition = GetComponent<PlayerCondition>();
         interaction = GetComponent<PlayerInteraction>();
+    }
+
+    public void AddItem(ConsumableType type, int amount)
+    {
+        switch (type)
+        {
+            case ConsumableType.Stamina:
+                break;
+            case ConsumableType.SpeedUp:
+                break;
+            case ConsumableType.JumpBoost:
+                break;
+            case ConsumableType.Health:
+                break;
+            default:
+                break;
+        }
     }
 }
