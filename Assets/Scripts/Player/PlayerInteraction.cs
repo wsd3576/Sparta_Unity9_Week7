@@ -20,7 +20,6 @@ public class PlayerInteraction : MonoBehaviour
     {
         camera = Camera.main;
         controller = GetComponent<PlayerController>();
-        controller.interaction += OnInteractInput;
     }
     
     private void Update()
@@ -50,7 +49,7 @@ public class PlayerInteraction : MonoBehaviour
         }
     }
 
-    private void OnInteractInput()
+    public void OnInteractInput()
     {
         if (curInteractable != null)
         {

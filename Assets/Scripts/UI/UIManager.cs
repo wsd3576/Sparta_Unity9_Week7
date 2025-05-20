@@ -29,7 +29,6 @@ public class UIManager : MonoBehaviour
 
     private void Start()
     {
-        GameManager.Instance.Player.controller.pauseMenu += TogglePauseMenu;
         TogglePauseMenu();
         infoPanel.SetActive(false);
     }

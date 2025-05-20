@@ -21,9 +21,6 @@ public class PlayerController : MonoBehaviour
     
     private Rigidbody _rigidbody;
     
-    public Action pauseMenu;
-    public Action interaction;
-    
     private void Awake()
     {
         _cameraContainer = GetComponentInChildren<Camera>().transform.parent.transform;
@@ -104,7 +101,7 @@ public class PlayerController : MonoBehaviour
             bool toggle = Cursor.lockState == CursorLockMode.Locked;
             Cursor.lockState = toggle ? CursorLockMode.None : CursorLockMode.Locked;
             _canLook = !toggle;
-            pauseMenu?.Invoke();
+            GameManager.Instance.PauseGame();
         }
     }
 
@@ -112,7 +109,7 @@ public class PlayerController : MonoBehaviour
     {
         if (context.phase == InputActionPhase.Started)
         {
-            interaction?.Invoke();
+            GameManager.Instance.Player.interaction.OnInteractInput();
         }
     }
 }
