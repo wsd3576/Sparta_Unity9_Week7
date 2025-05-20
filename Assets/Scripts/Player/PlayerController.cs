@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -10,8 +11,6 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float _jumpForce;
     [SerializeField] Vector2 _curMovementInput;
     [SerializeField] LayerMask _groundLayerMask;
-    private float _bonusSpeed = 0f;
-    private float _bonusJumpForce = 0f;
 
     [Header("Look")]
     [SerializeField] Transform _cameraContainer;
@@ -22,14 +21,24 @@ public class PlayerController : MonoBehaviour
     [SerializeField] Vector2 _mouseDelta;
     [SerializeField] bool _canLook = true;
     
+    [Header("Items")]
+    [SerializeField] private float _itemDuration;
+    [SerializeField] private List<InventoryItemData> items = new List<InventoryItemData>();
+    
+    private float _bonusSpeed = 0f;
+    private float _bonusJumpForce = 0f;
+    
+    private bool _isSpeedUp = false;
+    private bool _isJumpBoost = false;
+    
     private Rigidbody _rigidbody;
     
     private Dictionary<string, int> itemButtonMap = new Dictionary<string, int>()
     {
-        { "1", 1 },
-        { "2", 2 },
-        { "3", 3 },
-        { "4", 4 }
+        { "1", 0 },
+        { "2", 1 },
+        { "3", 2 },
+        { "4", 3 }
     };
     
     private void Awake()
@@ -130,10 +139,88 @@ public class PlayerController : MonoBehaviour
 
         string keyName = control.name.ToLower();
 
-        if (itemButtonMap.TryGetValue(keyName, out int value))
+        if (itemButtonMap.TryGetValue(keyName, out int index))
         {
-            Debug.Log($"입력된 버튼: {keyName}, 매핑된 값: {value}");
-            //해당 번호 아이템 사용
+            UseItem(index);
+        }
+    }
+    
+    public void AddItem(InventoryItemData item, int amount)
+    {
+        foreach (var i in items)
+        {
+            if (i.type == item.type)
+            {
+                i.amount += amount;
+                return;
+            }
+        }
+        InventoryItemData newItem = new InventoryItemData(item.type, amount, item.value);
+        items.Add(newItem);
+    }
+
+    public void UseItem(int index)
+    {
+        if (index >= items.Count) return;
+        switch (items[index].type)
+        {
+            case ConsumableType.Stamina:
+            case ConsumableType.Health:
+                ConditionType type = ConditionType.Health;
+                switch (items[index].type)
+                {
+                    case ConsumableType.Stamina:
+                        type = ConditionType.Health;
+                        break;
+                    case ConsumableType.SpeedUp:
+                        type = ConditionType.Stamina;
+                        break;
+                }
+                GameManager.Instance.Player.condition.GetCondition(type).Add(items[index].value); 
+                items[index].amount--;
+                break;
+            case ConsumableType.SpeedUp:
+            case ConsumableType.JumpBoost:
+                StartCoroutine(ItemBoost(items[index], items[index].value));
+                break;
+        }
+
+        if (items[index].amount <= 0)
+        {
+            items.Remove(items[index]);
+        }
+    }
+    
+    public IEnumerator ItemBoost(InventoryItemData item ,float value)
+    {
+        ConsumableType type = item.type;
+        switch (type)
+        {
+            case ConsumableType.SpeedUp:
+                if(_isSpeedUp) yield break;
+                _bonusSpeed = value;
+                _isSpeedUp = true;
+                break;
+            case ConsumableType.JumpBoost:
+                if(_isJumpBoost) yield break;
+                _bonusJumpForce = value;
+                _isJumpBoost = true;
+                break;
+        }
+        item.amount--;
+        
+        yield return new WaitForSeconds(_itemDuration);
+        
+        switch (type)
+        {
+            case ConsumableType.SpeedUp:
+                _bonusSpeed = 0f;
+                _isSpeedUp = false;
+                break;
+            case ConsumableType.JumpBoost:
+                _bonusJumpForce = 0f;
+                _isJumpBoost = false;
+                break;
         }
     }
 }

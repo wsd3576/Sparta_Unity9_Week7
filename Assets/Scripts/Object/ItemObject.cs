@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class ItemObject : MonoBehaviour, IInteractable
 {
-    public ItemData data;
+    [SerializeField] private ItemData data;
+    [SerializeField] private int amount;
 
     public (string, string) GetObjectInfo()
     {
@@ -15,7 +16,8 @@ public class ItemObject : MonoBehaviour, IInteractable
 
     public void OnInteractInput()
     {
-        GameManager.Instance.Player.AddItem(data.type, data.amount);
+        InventoryItemData item = new InventoryItemData(data.type, data.amount, data.value);
+        GameManager.Instance.Player.controller.AddItem(item, amount);
         Destroy(gameObject);
     }
 }

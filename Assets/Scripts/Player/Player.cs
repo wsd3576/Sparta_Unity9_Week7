@@ -17,21 +17,4 @@ public class Player : MonoBehaviour
         condition = GetComponent<PlayerCondition>();
         interaction = GetComponent<PlayerInteraction>();
     }
-
-    public void AddItem(ConsumableType type, int amount)
-    {
-        switch (type)
-        {
-            case ConsumableType.Stamina:
-                break;
-            case ConsumableType.SpeedUp:
-                break;
-            case ConsumableType.JumpBoost:
-                break;
-            case ConsumableType.Health:
-                break;
-            default:
-                break;
-        }
-    }
 }

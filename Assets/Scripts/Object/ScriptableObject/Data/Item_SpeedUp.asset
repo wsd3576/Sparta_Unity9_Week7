@@ -10,11 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3ee1f41b868e0814a8b591e7618a2029, type: 3}
-  m_Name: Item_Box
+  m_Name: Item_SpeedUp
   m_EditorClassIdentifier: 
-  itemName: "\uBC15\uC2A4"
-  itemDescription: "\uBC15\uC2A4\uC785\uB2C8\uB2E4."
+  itemName: "\uC18D\uB3C4\uC758 \uBB3C\uC57D"
+  itemDescription: "\uC0AC\uC2E4 \uADF8\uB0E5 \uD050\uBE0C\uC9C0\uB9CC \uC554\uD2BC
+    \uBB3C\uC57D\uC785\uB2C8\uB2E4."
   icon: {fileID: 0}
-  type: 0
-  value: 0
+  type: 1
+  value: 100
   amount: 0
