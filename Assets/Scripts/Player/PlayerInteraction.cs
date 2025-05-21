@@ -14,7 +14,7 @@ public class PlayerInteraction : MonoBehaviour
     [SerializeField] LayerMask layerMask;
 
     [SerializeField] GameObject curInteractGameObject;
-    [SerializeField] private IInteractable curInteractable;
+    private IInteractable curInteractable;
     
     private void Start()
     {
@@ -38,7 +38,6 @@ public class PlayerInteraction : MonoBehaviour
             {
                 curInteractGameObject = hit.collider.gameObject;
                 curInteractable = hit.collider.GetComponent<IInteractable>();
-                Debug.Log($"{hit.collider.gameObject.name}");
                 GameManager.Instance.UIManager.ShowObjectInfo(curInteractable);
             }
         }

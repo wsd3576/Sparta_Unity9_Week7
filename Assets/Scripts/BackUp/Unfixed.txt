@@ -153,9 +153,11 @@ public class PlayerController : MonoBehaviour
     
     public void AddItem(ItemData item, int amount)
     {
+        int slotIndex;
         _curItemData = item;
         for (int i = 0; i < items.Count; i++)
         {
+            slotIndex = i;
             if (items[i].itemData == item)
             {
                 items[i].quantity += amount;
@@ -172,7 +174,7 @@ public class PlayerController : MonoBehaviour
             items.Add(new InventoryItem(item, amount));
         }
 
-        GameManager.Instance.UIManager.UpdateInventory(items);
+        GameManager.Instance.UIManager.UpdateInventory();
     }
 
     private void DropItem()
@@ -208,7 +210,7 @@ public class PlayerController : MonoBehaviour
                 items.Remove(items[index]);
             }
         }
-        GameManager.Instance.UIManager.UpdateInventory(items);
+        GameManager.Instance.UIManager.UpdateInventory();
     }
 
     private void ItemBoost(ItemDataConsumable item)
@@ -246,5 +248,159 @@ public class PlayerController : MonoBehaviour
     {
         yield return new WaitForSeconds(_itemDuration);
         _bonusJumpForce = 0f;
+    }
+}
+
+
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
+
+public class UIManager : MonoBehaviour
+{
+    [Header("Pause Menu")]
+    [SerializeField] private GameObject pauseMenu;
+    
+    [Header("Object Info")]
+    [SerializeField] private GameObject infoPanel;
+    public GameObject InfoPanel
+    {
+        get{return infoPanel;}
+    }
+    [SerializeField] private TextMeshProUGUI objectNameText;
+    [SerializeField] private TextMeshProUGUI objectDescriptionText;
+    
+    [Header("Conditions")]
+    public ConditionUI _health;
+    public ConditionUI _stamina;
+    
+    [Header("Inventory")]
+    [SerializeField] private Transform inventoryPanel;
+    public ItemSlot[] inventory;
+
+    private void Awake()
+    {
+        GameManager.Instance.UIManager = this;
+        inventory = new ItemSlot[inventoryPanel.childCount];
+        for (int i = 0; i < inventory.Length; i++)
+        {
+            inventory[i] = inventoryPanel.GetChild(i).GetComponent<ItemSlot>();
+            inventory[i].index = i;
+            inventory[i].uiManager = this;
+            inventory[i].ClearSlot();
+        }
+        TogglePauseMenu();
+        infoPanel.SetActive(false);
+    }
+
+    public void TogglePauseMenu()
+    {
+        if (pauseMenu.activeInHierarchy)
+        {
+            pauseMenu.SetActive(false);
+        }
+        else
+        {
+            pauseMenu.SetActive(true);
+        }
+    }
+
+    public void ShowObjectInfo(IInteractable interactable)
+    {
+        infoPanel.SetActive(true); 
+        objectNameText.text = interactable.GetObjectInfo().Item1;
+        objectDescriptionText.text = interactable.GetObjectInfo().Item2;
+    }
+    
+    public void UpdateInventory()
+    {
+        //플레이어 아이템들 정보를 가져와서 해당 아이템과 찾아온 슬롯의 아이템이 같다면 양을 증가 아무 칸에도 같은 아이템이 없으면 빈 칸에 아이템 추가
+        foreach (var item in GameManager.Instance.Player.controller.items)
+        {
+            ItemSlot slot = GetCurItemSlot(item);
+            if (slot != null)
+            {
+                slot.currentItem.quantity += item.quantity;
+                break;
+            }
+        
+            ItemSlot emptySlot = GetEmptySlot();
+
+            if (emptySlot != null)
+            {
+                emptySlot.currentItem = item;
+                emptySlot.currentItem.quantity = 1;
+                break;
+            }
+        }
+        
+        foreach (ItemSlot slot in inventory)
+        {
+            if (slot.currentItem != null)
+            {
+                slot.SetSlot();
+            }
+            else
+            {
+                slot.ClearSlot();
+            }
+        }
+    }
+    
+    ItemSlot GetCurItemSlot(InventoryItem data)
+    {
+        foreach (ItemSlot slot in inventory)
+        {
+            if (slot.currentItem == data)
+            {
+                return slot;
+            }
+        }
+        return null;
+    }
+    
+    ItemSlot GetEmptySlot()
+    {
+        foreach (ItemSlot slot in inventory)
+        {
+            if (slot.currentItem == null)
+            {
+                return slot;
+            }
+        }
+        return null;
+    }
+}
+
+
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+
+public class ItemSlot : MonoBehaviour
+{
+    [SerializeField] private Image icon;
+    [SerializeField] private TextMeshProUGUI quantityText;
+    
+    public UIManager uiManager;
+
+    public int index;
+    public InventoryItem currentItem;
+
+    public void SetSlot()
+    {
+        icon.sprite = currentItem.itemData.icon;
+        quantityText.text = currentItem.quantity.ToString();
+        gameObject.SetActive(true);
+    }
+
+    public void ClearSlot()
+    {
+        currentItem = null;
+        icon.sprite = null;
+        quantityText.text = "";
+        gameObject.SetActive(false);
     }
 }

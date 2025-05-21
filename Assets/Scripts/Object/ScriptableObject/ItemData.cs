@@ -44,6 +44,8 @@ public class ItemData : ScriptableObject
     public ItemType type;
     public Sprite icon;
     
+    public GameObject dropPrefab;
+    
     [Header("Consumable")]
     public ItemDataConsumable[] consumables;
     

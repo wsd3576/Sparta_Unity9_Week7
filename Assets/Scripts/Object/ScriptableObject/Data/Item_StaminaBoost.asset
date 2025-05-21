@@ -10,15 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3ee1f41b868e0814a8b591e7618a2029, type: 3}
-  m_Name: Item_SpeedUp
+  m_Name: Item_StaminaBoost
   m_EditorClassIdentifier: 
-  itemName: "\uC18D\uB3C4\uC758 \uBB3C\uC57D"
-  itemDescription: "\uC0AC\uC2E4 \uADF8\uB0E5 \uD050\uBE0C\uC9C0\uB9CC \uC554\uD2BC
-    \uBB3C\uC57D\uC785\uB2C8\uB2E4."
+  itemName: "\uC2A4\uD0DC\uBBF8\uB098 \uD3EC\uC158"
+  itemDescription: "\uC554\uD2BC \uD3EC\uC158"
   type: 1
-  icon: {fileID: 0}
-  amount: 0
+  icon: {fileID: 21300000, guid: e12e1a0e4a7453c42932e826264d0473, type: 3}
+  dropPrefab: {fileID: 6126580471335198407, guid: 69b36bd9daa6e6341b9d92cbb30959f3, type: 3}
   consumables:
-  - type: 1
-    value: 100
+  - type: 0
+    value: 30
   equipPrefab: {fileID: 0}
