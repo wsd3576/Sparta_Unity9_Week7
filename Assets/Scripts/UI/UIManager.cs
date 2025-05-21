@@ -1,5 +1,3 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -62,21 +60,20 @@ public class UIManager : MonoBehaviour
     
     public void UpdateInventory(List<InventoryItem> items)
     {
+        foreach (ItemSlot slot in inventory)
+        {
+            slot.currentItem = null;
+        }
+        
         foreach (var item in items)
         {
-            ItemSlot slot = GetCurItemSlot(item);
-            if (slot != null)
-            {
-                slot.currentItem.quantity = item.quantity;
-                continue;
-            }
+            ItemSlot slot = GetCurItemSlot(item.itemData);
+            if (slot != null) continue;
         
             ItemSlot emptySlot = GetEmptySlot();
-
             if (emptySlot != null)
             {
                 emptySlot.currentItem = item;
-                emptySlot.currentItem.quantity = item.quantity;
             }
         }
         
@@ -93,11 +90,11 @@ public class UIManager : MonoBehaviour
         }
     }
     
-    ItemSlot GetCurItemSlot(InventoryItem data)
+    ItemSlot GetCurItemSlot(ItemData data)
     {
         foreach (ItemSlot slot in inventory)
         {
-            if (slot.currentItem == data)
+            if (slot.currentItem != null && slot.currentItem.itemData == data)
             {
                 return slot;
             }

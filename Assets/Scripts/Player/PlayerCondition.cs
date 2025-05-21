@@ -1,6 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerCondition : MonoBehaviour, IDamageable
@@ -33,16 +30,6 @@ public class PlayerCondition : MonoBehaviour, IDamageable
             }
         }
         return null;
-    }
-
-    public void AddToCondition(ConditionType type, float value)
-    {
-        GetCondition(type)?.Add(value);
-    }
-
-    public void SubtractFromCondition(ConditionType type, float value)
-    {
-        GetCondition(type)?.Subtract(value);
     }
 
     public void Damage(ConditionType type, float damage)

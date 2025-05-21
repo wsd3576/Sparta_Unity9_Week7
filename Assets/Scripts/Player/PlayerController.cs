@@ -2,14 +2,19 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Random = UnityEngine.Random;
 
 public class PlayerController : MonoBehaviour
 {
     [Header("Movement")]
     [SerializeField] float _moveSpeed;
+    [SerializeField] float _sprintSpeed;
     [SerializeField] float _jumpForce;
     [SerializeField] Vector2 _curMovementInput;
     [SerializeField] LayerMask _groundLayerMask;
+    [SerializeField] private float _sprintStamina;
+    [SerializeField] private float _jumpStamina;
+    bool _isSprinting = false;
 
     [Header("Look")]
     [SerializeField] Transform _cameraContainer;
@@ -36,7 +41,7 @@ public class PlayerController : MonoBehaviour
     
     private Rigidbody _rigidbody;
     
-    private readonly Dictionary<string, int> _itemButtonMap = new Dictionary<string, int>()
+    private readonly Dictionary<string, int> _itemButtonMap = new()
     {
         { "1", 0 },
         { "2", 1 },
@@ -55,7 +60,20 @@ public class PlayerController : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         _maxItemCount = GameManager.Instance.UIManager.inventory.Length;
     }
-    
+
+    private void Update()
+    {
+        if (_isSprinting)
+        {
+            GameManager.Instance.Player.condition.GetCondition(ConditionType.Stamina).Subtract(Time.deltaTime * _sprintStamina);
+            
+            if (GameManager.Instance.Player.condition.GetCondition(ConditionType.Stamina).curValue <= 0)
+            {
+                _isSprinting = false;
+            }
+        }
+    }
+
     private void FixedUpdate()
     {
         Move();
@@ -69,7 +87,7 @@ public class PlayerController : MonoBehaviour
     private void Move()
     {
         Vector3 dir = transform.forward * _curMovementInput.y + transform.right * _curMovementInput.x;
-        dir *= _moveSpeed + _bonusSpeed;
+        dir *= ((_moveSpeed + _bonusSpeed) * (_isSprinting ? _sprintSpeed : 1f));
         dir.y = _rigidbody.velocity.y;
         
         _rigidbody.velocity = dir;
@@ -96,10 +114,30 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    public void OnSprint(InputAction.CallbackContext context)
+    {
+        if (GameManager.Instance.Player.condition.GetCondition(ConditionType.Stamina).curValue <= 0)
+        {
+            _isSprinting = false;
+            return;
+        }
+
+        if (context.phase == InputActionPhase.Started)
+        {
+            _isSprinting = true;
+        }
+        else if (context.phase == InputActionPhase.Canceled)
+        {
+            _isSprinting = false;
+        }
+    }
+
     public void OnJump(InputAction.CallbackContext context)
     {
+        if (GameManager.Instance.Player.condition.GetCondition(ConditionType.Stamina).curValue <= _jumpStamina) return;
         if (context.phase == InputActionPhase.Started && IsGrounded())
         {
+            GameManager.Instance.Player.condition.GetCondition(ConditionType.Stamina).Subtract(_jumpStamina);
             _rigidbody.AddForce(Vector2.up * (_jumpForce + _bonusJumpForce), ForceMode.Impulse);
         }
     }
@@ -154,22 +192,22 @@ public class PlayerController : MonoBehaviour
     public void AddItem(ItemData item, int amount)
     {
         _curItemData = item;
-        for (int i = 0; i < items.Count; i++)
+        
+        if(items.Exists(i => i.itemData == item))
         {
-            if (items[i].itemData == item)
-            {
-                items[i].quantity += amount;
-                return;
-            }
-        }
-
-        if (items.Count == _maxItemCount)
-        {
-            DropItem();
+            InventoryItem existingItem = items.Find(i => i.itemData == item);
+            existingItem.quantity += amount;
         }
         else
         {
-            items.Add(new InventoryItem(item, amount));
+            if (items.Count == _maxItemCount)
+            {
+                DropItem();
+            }
+            else
+            {
+                items.Add(new InventoryItem(item, amount));
+            }
         }
 
         GameManager.Instance.UIManager.UpdateInventory(items);
@@ -192,10 +230,10 @@ public class PlayerController : MonoBehaviour
                 switch (con.type)
                 {
                     case ConsumableType.Stamina:
-                        GameManager.Instance.Player.condition.AddToCondition(ConditionType.Stamina, con.value);
+                        GameManager.Instance.Player.condition.GetCondition(ConditionType.Stamina).Add(con.value);
                         break;
                     case ConsumableType.Health:
-                        GameManager.Instance.Player.condition.AddToCondition(ConditionType.Health, con.value);
+                        GameManager.Instance.Player.condition.GetCondition(ConditionType.Health).Add(con.value);
                         break;
                     case ConsumableType.SpeedUp:
                     case ConsumableType.JumpBoost:
