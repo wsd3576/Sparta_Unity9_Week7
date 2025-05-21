@@ -9,7 +9,7 @@ public class MovingObject : MonoBehaviour
     private Transform platform;
     [Header("Target")]
     [SerializeField] private Transform targetParent;
-    [SerializeField] private Transform[] targets;
+    private Transform[] targets;
     [SerializeField] private float moveDelay = 1f;
     [SerializeField] private float moveSpeed = 2f;
     
@@ -19,6 +19,7 @@ public class MovingObject : MonoBehaviour
 
     private void Start()
     {
+        //플렛폼을 지정하고 목표위치들을 받아와서 배열로 넣는다.
         platform = gameObject.transform;
         targets = new Transform[targetParent.childCount];
         for (int i = 0; i < targets.Length; i++)
@@ -33,14 +34,8 @@ public class MovingObject : MonoBehaviour
     {
         while (true)
         {
-            if (!isMoving)
-            {
-                yield return null;
-                continue;
-            }
-
             Vector3 targetPos = targets[currentTargetIndex].position;
-
+            
             while (Vector3.Distance(platform.position, targetPos) > 0.01f)
             {
                 platform.position = Vector3.MoveTowards(
@@ -56,7 +51,7 @@ public class MovingObject : MonoBehaviour
             yield return new WaitForSeconds(moveDelay);
             
             currentTargetIndex += direction;
-
+            
             if (currentTargetIndex >= targets.Length)
             {
                 direction = -1;
@@ -77,7 +72,7 @@ public class MovingObject : MonoBehaviour
             other.transform.SetParent(platform.transform);
         }
     }
-
+    
     private void OnTriggerExit(Collider other)
     {
         if (other.CompareTag("Player"))

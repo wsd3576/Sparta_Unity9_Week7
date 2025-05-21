@@ -17,7 +17,8 @@ public class PlayerController : MonoBehaviour
     private bool isSprinting = false;
 
     [Header("Look")]
-    [SerializeField] private Transform cameraContainer;
+    [SerializeField] private Transform _cameraContainer;
+    public Transform CameraContainer {get => _cameraContainer;}
     [SerializeField] private float minXLook;
     [SerializeField] private float maxXLook;
     [SerializeField] private float camCurXRot;
@@ -31,10 +32,12 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private LayerMask thirdPersonCullingMask;
     [SerializeField] private LayerMask firstPersonCullingMask;
     
+    
     private float smoothSpeed = 10f;
     private bool isThirdPerson = false;
     
     private Transform currentCameraTarget;
+    public Transform CameraTarget{get => currentCameraTarget;}
     private Vector3 camVelocity;
     
     [Header("Items")]
@@ -62,7 +65,7 @@ public class PlayerController : MonoBehaviour
     
     private void Awake()
     {
-        cameraContainer = GetComponentInChildren<Camera>().transform.parent.transform;
+        _cameraContainer = GetComponentInChildren<Camera>().transform.parent.transform;
         _rigidbody = GetComponent<Rigidbody>();
     }
     
@@ -88,17 +91,10 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        cameraContainer.position = Vector3.Lerp
+        _cameraContainer.position = Vector3.Lerp
         (
-            cameraContainer.position,
+            _cameraContainer.position,
             currentCameraTarget.position,
-            Time.deltaTime * smoothSpeed
-        );
-
-        cameraContainer.rotation = Quaternion.Slerp
-        (
-            cameraContainer.rotation,
-            currentCameraTarget.rotation,
             Time.deltaTime * smoothSpeed
         );
         
@@ -126,7 +122,7 @@ public class PlayerController : MonoBehaviour
     {
         camCurXRot += mouseDelta.y * lookSensitivity; //Y방향 회전은 X축을 회전하는 것이기 때문(마우스의 Y축 회전 => 오브젝트의 X방향 회전)
         camCurXRot = Mathf.Clamp(camCurXRot, minXLook, maxXLook);
-        cameraContainer.localEulerAngles = new Vector3(-camCurXRot, 0, 0); //+방향 회전은 아래를 향하는 것이기 때문에 마우스 아래로 내림 = -값 이기 때문에
+        _cameraContainer.localEulerAngles = new Vector3(-camCurXRot, 0, 0); //+방향 회전은 아래를 향하는 것이기 때문에 마우스 아래로 내림 = -값 이기 때문에
         
         transform.eulerAngles += new Vector3(0, mouseDelta.x * lookSensitivity, 0); //X방향 회전은 Y축을 회전하는 것이기 때문(마우스의 X축 회전 => 오브젝트의 Y방향 회전)
     }
