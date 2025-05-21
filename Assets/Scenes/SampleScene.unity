@@ -1151,7 +1151,7 @@ MonoBehaviour:
   canLook: 1
   fpsCameraTarget: {fileID: 1033368546}
   tpsCameraTarget: {fileID: 379365628}
-  mainCamera: {fileID: 2086975197}
+  camera: {fileID: 2086975197}
   thirdPersonCullingMask:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -1213,6 +1213,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxCheckDistance: 5
+  rayOriginOffsetY: 1.7
   layerMask:
     serializedVersion: 2
     m_Bits: 256
@@ -2963,7 +2964,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetParent: {fileID: 53971615}
-  targets: []
   moveDelay: 1
   moveSpeed: 2
 --- !u!65 &990839371

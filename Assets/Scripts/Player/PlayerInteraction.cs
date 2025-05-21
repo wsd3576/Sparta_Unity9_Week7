@@ -8,8 +8,12 @@ public class PlayerInteraction : MonoBehaviour
     private float checkRate = 0.05f;
     private float lastCheckTime;
     
-    [SerializeField] private float maxCheckDistance;
+    [SerializeField] private float maxCheckDistance = 5f;
+    [SerializeField] private float rayOriginOffsetY = 1.7f;
     [SerializeField] LayerMask layerMask;
+    
+    private Vector3 rayOrigin;
+    private Vector3 rayDirection;
 
     [SerializeField] GameObject curInteractGameObject;
     private IInteractable curInteractable;
@@ -26,8 +30,11 @@ public class PlayerInteraction : MonoBehaviour
             
         lastCheckTime = Time.time;
         
-        Ray ray = camera.ScreenPointToRay(new Vector3(Screen.width / 2f, Screen.height / 2f));
-        Debug.DrawRay(ray.origin, ray.direction * 10f, Color.yellow);
+        rayOrigin = gameObject.transform.position + (Vector3.up * rayOriginOffsetY);
+        rayDirection = camera.transform.forward;
+
+        Ray ray = new Ray(rayOrigin, rayDirection);
+        
         RaycastHit hit;
 
         if (Physics.Raycast(ray, out hit, maxCheckDistance, layerMask))

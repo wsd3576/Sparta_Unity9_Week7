@@ -7,28 +7,27 @@ using Random = UnityEngine.Random;
 public class PlayerController : MonoBehaviour
 {
     [Header("Movement")]
-    [SerializeField] private float moveSpeed;
-    [SerializeField] private float sprintSpeed;
-    [SerializeField] private float jumpForce;
+    [SerializeField] private float moveSpeed = 5f;
+    [SerializeField] private float sprintSpeed = 1.5f;
+    [SerializeField] private float jumpForce = 100f;
     private Vector2 curMovementInput;
     [SerializeField] private LayerMask groundLayerMask;
-    [SerializeField] private float sprintStamina;
-    [SerializeField] private float jumpStamina;
+    [SerializeField] private float sprintStamina = 10f;
+    [SerializeField] private float jumpStamina = 10f;
     private bool isSprinting = false;
 
     [Header("Look")]
-    [SerializeField] private Transform _cameraContainer;
-    public Transform CameraContainer {get => _cameraContainer;}
-    [SerializeField] private float minXLook;
-    [SerializeField] private float maxXLook;
+    [SerializeField] private Transform cameraContainer;
+    [SerializeField] private float minXLook = -85f;
+    [SerializeField] private float maxXLook = 85f;
     [SerializeField] private float camCurXRot;
-    [SerializeField] private float lookSensitivity;
+    [SerializeField] private float lookSensitivity = 0.5f;
     [SerializeField] private Vector2 mouseDelta;
     [SerializeField] private bool canLook = true;
     //3인칭 전환
     [SerializeField] private Transform fpsCameraTarget;
     [SerializeField] private Transform tpsCameraTarget;
-    [SerializeField] private Camera mainCamera;
+    [SerializeField] private Camera camera;
     [SerializeField] private LayerMask thirdPersonCullingMask;
     [SerializeField] private LayerMask firstPersonCullingMask;
     
@@ -37,8 +36,6 @@ public class PlayerController : MonoBehaviour
     private bool isThirdPerson = false;
     
     private Transform currentCameraTarget;
-    public Transform CameraTarget{get => currentCameraTarget;}
-    private Vector3 camVelocity;
     
     [Header("Items")]
     [SerializeField] private ItemData curItemData;
@@ -65,7 +62,7 @@ public class PlayerController : MonoBehaviour
     
     private void Awake()
     {
-        _cameraContainer = GetComponentInChildren<Camera>().transform.parent.transform;
+        cameraContainer = GetComponentInChildren<Camera>().transform.parent.transform;
         _rigidbody = GetComponent<Rigidbody>();
     }
     
@@ -91,9 +88,9 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        _cameraContainer.position = Vector3.Lerp
+        camera.transform.position = Vector3.Lerp
         (
-            _cameraContainer.position,
+            camera.transform.position,
             currentCameraTarget.position,
             Time.deltaTime * smoothSpeed
         );
@@ -122,7 +119,7 @@ public class PlayerController : MonoBehaviour
     {
         camCurXRot += mouseDelta.y * lookSensitivity; //Y방향 회전은 X축을 회전하는 것이기 때문(마우스의 Y축 회전 => 오브젝트의 X방향 회전)
         camCurXRot = Mathf.Clamp(camCurXRot, minXLook, maxXLook);
-        _cameraContainer.localEulerAngles = new Vector3(-camCurXRot, 0, 0); //+방향 회전은 아래를 향하는 것이기 때문에 마우스 아래로 내림 = -값 이기 때문에
+        cameraContainer.localEulerAngles = new Vector3(-camCurXRot, 0, 0); //+방향 회전은 아래를 향하는 것이기 때문에 마우스 아래로 내림 = -값 이기 때문에
         
         transform.eulerAngles += new Vector3(0, mouseDelta.x * lookSensitivity, 0); //X방향 회전은 Y축을 회전하는 것이기 때문(마우스의 X축 회전 => 오브젝트의 Y방향 회전)
     }
@@ -317,7 +314,7 @@ public class PlayerController : MonoBehaviour
         {
             isThirdPerson = !isThirdPerson;
             currentCameraTarget = isThirdPerson ? tpsCameraTarget : fpsCameraTarget;
-            mainCamera.cullingMask = isThirdPerson ? thirdPersonCullingMask : firstPersonCullingMask;
+            camera.cullingMask = isThirdPerson ? thirdPersonCullingMask : firstPersonCullingMask;
         }
     }
 }
