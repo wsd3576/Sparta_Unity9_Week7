@@ -28,15 +28,12 @@ public class PlayerController : MonoBehaviour
     private float _bonusSpeed = 0f;
     private float _bonusJumpForce = 0f;
     
-    private bool _isSpeedUp = false;
-    private bool _isJumpBoost = false;
-    
     private Coroutine _speedUpCoroutine;
     private Coroutine _jumpBoostCoroutine;
     
     private Rigidbody _rigidbody;
     
-    private Dictionary<string, int> itemButtonMap = new Dictionary<string, int>()
+    private readonly Dictionary<string, int> _itemButtonMap = new Dictionary<string, int>()
     {
         { "1", 0 },
         { "2", 1 },
@@ -142,7 +139,7 @@ public class PlayerController : MonoBehaviour
 
         string keyName = control.name.ToLower();
 
-        if (itemButtonMap.TryGetValue(keyName, out int index))
+        if (_itemButtonMap.TryGetValue(keyName, out int index))
         {
             UseItem(index);
         }
@@ -162,7 +159,7 @@ public class PlayerController : MonoBehaviour
         items.Add(item);
     }
 
-    public void UseItem(int index)
+    private void UseItem(int index)
     {
         if (index >= items.Count) return;
         if (items[index].type == ItemType.Consumable)
@@ -180,7 +177,7 @@ public class PlayerController : MonoBehaviour
                         break;
                     case ConsumableType.SpeedUp:
                     case ConsumableType.JumpBoost:
-                        StartCoroutine(ItemBoost(con)); 
+                        ItemBoost(con); 
                         break;
                 }
             }
@@ -191,34 +188,40 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    public IEnumerator ItemBoost(ItemDataConsumable item)
+    private void ItemBoost(ItemDataConsumable item)
     {
         switch (item.type)
         {
             case ConsumableType.SpeedUp:
-                if (_isSpeedUp) yield break;
+                if (_speedUpCoroutine != null)
+                {
+                    StopCoroutine(_speedUpCoroutine);
+                }
                 _bonusSpeed = item.value;
-                _isSpeedUp = true;
+                _speedUpCoroutine = StartCoroutine(HandleSpeedUp());
                 break;
+
             case ConsumableType.JumpBoost:
-                if (_isJumpBoost) yield break;
+                if (_jumpBoostCoroutine != null)
+                {
+                    StopCoroutine(_jumpBoostCoroutine);
+                }
                 _bonusJumpForce = item.value;
-                _isJumpBoost = true;
+                _jumpBoostCoroutine = StartCoroutine(HandleJumpBoost());
                 break;
+            
         }
+    }
 
+    private IEnumerator HandleSpeedUp()
+    {
         yield return new WaitForSeconds(_itemDuration);
+        _bonusSpeed = 0f;
+    }
 
-        switch (item.type)
-        {
-            case ConsumableType.SpeedUp:
-                _bonusSpeed = 0f;
-                _isSpeedUp = false;
-                break;
-            case ConsumableType.JumpBoost:
-                _bonusJumpForce = 0f;
-                _isJumpBoost = false;
-                break;
-        }
+    private IEnumerator HandleJumpBoost()
+    {
+        yield return new WaitForSeconds(_itemDuration);
+        _bonusJumpForce = 0f;
     }
 }
