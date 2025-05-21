@@ -16,6 +16,19 @@ public enum ConsumableType
 }
 
 [Serializable]
+public class InventoryItem
+{
+    public ItemData itemData;
+    public int quantity;
+
+    public InventoryItem(ItemData data, int qty)
+    {
+        itemData = data;
+        quantity = qty;
+    }
+}
+
+[Serializable]
 public class ItemDataConsumable
 {
     public ConsumableType type;
@@ -30,7 +43,6 @@ public class ItemData : ScriptableObject
     public string itemDescription;
     public ItemType type;
     public Sprite icon;
-    public int amount;
     
     [Header("Consumable")]
     public ItemDataConsumable[] consumables;

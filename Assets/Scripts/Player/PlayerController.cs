@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -23,7 +22,7 @@ public class PlayerController : MonoBehaviour
     
     [Header("Items")]
     [SerializeField] private float _itemDuration;
-    [SerializeField] private List<ItemData> items = new List<ItemData>();
+    [SerializeField] private List<InventoryItem> items = new List<InventoryItem>();
     
     private float _bonusSpeed = 0f;
     private float _bonusJumpForce = 0f;
@@ -135,13 +134,16 @@ public class PlayerController : MonoBehaviour
 
     public void UseItem(InputAction.CallbackContext context)
     {
-        var control = context.control;
-
-        string keyName = control.name.ToLower();
-
-        if (_itemButtonMap.TryGetValue(keyName, out int index))
+        if (context.phase == InputActionPhase.Started)
         {
-            UseItem(index);
+            var control = context.control;
+
+            string keyName = control.name.ToLower();
+
+            if (_itemButtonMap.TryGetValue(keyName, out int index))
+            {
+                UseItem(index);
+            }
         }
     }
     
@@ -149,23 +151,24 @@ public class PlayerController : MonoBehaviour
     {
         foreach (var i in items)
         {
-            if (i.type == item.type)
+            if (i.itemData == item)
             {
-                i.amount += amount;
+                i.quantity += amount;
                 return;
             }
         }
-        item.amount = amount;
-        items.Add(item);
+        items.Add(new InventoryItem(item, amount));
     }
 
     private void UseItem(int index)
     {
         if (index >= items.Count) return;
-        if (items[index].type == ItemType.Consumable)
+        if (items[index].itemData.type == ItemType.Consumable)
         {
-            items[index].amount--;
-            foreach (var con in items[index].consumables)
+            Debug.Log($"사용 전 {items[index].quantity}");
+            items[index].quantity--;
+            Debug.Log($"사용 휴 {items[index].quantity}");
+            foreach (var con in items[index].itemData.consumables)
             {
                 switch (con.type)
                 {
@@ -181,7 +184,7 @@ public class PlayerController : MonoBehaviour
                         break;
                 }
             }
-            if (items[index].amount <= 0)
+            if (items[index].quantity <= 0)
             {
                 items.Remove(items[index]);
             }
