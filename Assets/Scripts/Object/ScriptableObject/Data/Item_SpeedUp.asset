@@ -15,7 +15,10 @@ MonoBehaviour:
   itemName: "\uC18D\uB3C4\uC758 \uBB3C\uC57D"
   itemDescription: "\uC0AC\uC2E4 \uADF8\uB0E5 \uD050\uBE0C\uC9C0\uB9CC \uC554\uD2BC
     \uBB3C\uC57D\uC785\uB2C8\uB2E4."
-  icon: {fileID: 0}
   type: 1
-  value: 100
+  icon: {fileID: 0}
   amount: 0
+  consumables:
+  - type: 1
+    value: 100
+  equipPrefab: {fileID: 0}

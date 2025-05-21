@@ -23,13 +23,16 @@ public class PlayerController : MonoBehaviour
     
     [Header("Items")]
     [SerializeField] private float _itemDuration;
-    [SerializeField] private List<InventoryItemData> items = new List<InventoryItemData>();
+    [SerializeField] private List<ItemData> items = new List<ItemData>();
     
     private float _bonusSpeed = 0f;
     private float _bonusJumpForce = 0f;
     
     private bool _isSpeedUp = false;
     private bool _isJumpBoost = false;
+    
+    private Coroutine _speedUpCoroutine;
+    private Coroutine _jumpBoostCoroutine;
     
     private Rigidbody _rigidbody;
     
@@ -145,7 +148,7 @@ public class PlayerController : MonoBehaviour
         }
     }
     
-    public void AddItem(InventoryItemData item, int amount)
+    public void AddItem(ItemData item, int amount)
     {
         foreach (var i in items)
         {
@@ -155,63 +158,58 @@ public class PlayerController : MonoBehaviour
                 return;
             }
         }
-        InventoryItemData newItem = new InventoryItemData(item.type, amount, item.value);
-        items.Add(newItem);
+        item.amount = amount;
+        items.Add(item);
     }
 
     public void UseItem(int index)
     {
         if (index >= items.Count) return;
-        switch (items[index].type)
+        if (items[index].type == ItemType.Consumable)
         {
-            case ConsumableType.Stamina:
-            case ConsumableType.Health:
-                ConditionType type = ConditionType.Health;
-                switch (items[index].type)
+            items[index].amount--;
+            foreach (var con in items[index].consumables)
+            {
+                switch (con.type)
                 {
                     case ConsumableType.Stamina:
-                        type = ConditionType.Health;
+                        GameManager.Instance.Player.condition.AddToCondition(ConditionType.Stamina, con.value);
+                        break;
+                    case ConsumableType.Health:
+                        GameManager.Instance.Player.condition.AddToCondition(ConditionType.Health, con.value);
                         break;
                     case ConsumableType.SpeedUp:
-                        type = ConditionType.Stamina;
+                    case ConsumableType.JumpBoost:
+                        StartCoroutine(ItemBoost(con)); 
                         break;
                 }
-                GameManager.Instance.Player.condition.GetCondition(type).Add(items[index].value); 
-                items[index].amount--;
-                break;
-            case ConsumableType.SpeedUp:
-            case ConsumableType.JumpBoost:
-                StartCoroutine(ItemBoost(items[index], items[index].value));
-                break;
-        }
-
-        if (items[index].amount <= 0)
-        {
-            items.Remove(items[index]);
+            }
+            if (items[index].amount <= 0)
+            {
+                items.Remove(items[index]);
+            }
         }
     }
-    
-    public IEnumerator ItemBoost(InventoryItemData item ,float value)
+
+    public IEnumerator ItemBoost(ItemDataConsumable item)
     {
-        ConsumableType type = item.type;
-        switch (type)
+        switch (item.type)
         {
             case ConsumableType.SpeedUp:
-                if(_isSpeedUp) yield break;
-                _bonusSpeed = value;
+                if (_isSpeedUp) yield break;
+                _bonusSpeed = item.value;
                 _isSpeedUp = true;
                 break;
             case ConsumableType.JumpBoost:
-                if(_isJumpBoost) yield break;
-                _bonusJumpForce = value;
+                if (_isJumpBoost) yield break;
+                _bonusJumpForce = item.value;
                 _isJumpBoost = true;
                 break;
         }
-        item.amount--;
-        
+
         yield return new WaitForSeconds(_itemDuration);
-        
-        switch (type)
+
+        switch (item.type)
         {
             case ConsumableType.SpeedUp:
                 _bonusSpeed = 0f;

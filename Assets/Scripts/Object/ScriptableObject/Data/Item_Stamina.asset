@@ -14,7 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemName: "\uC2A4\uD0DC\uBBF8\uB098 \uD3EC\uC158"
   itemDescription: "\uC554\uD2BC \uD3EC\uC158"
+  type: 1
   icon: {fileID: 0}
-  type: 0
-  value: 10
   amount: 0
+  consumables:
+  - type: 0
+    value: 30
+  equipPrefab: {fileID: 0}
