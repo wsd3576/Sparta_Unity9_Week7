@@ -33,6 +33,7 @@ public class ItemDataConsumable
 {
     public ConsumableType type;
     public float value;
+    public float duration;
 }
 
 [CreateAssetMenu(fileName = "Item", menuName = "New Item")]
@@ -45,7 +46,7 @@ public class ItemData : ScriptableObject
     public Sprite icon;
     
     public GameObject dropPrefab;
-    
+
     [Header("Consumable")]
     public ItemDataConsumable[] consumables;
     

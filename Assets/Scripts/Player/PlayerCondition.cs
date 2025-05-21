@@ -38,6 +38,7 @@ public class PlayerCondition : MonoBehaviour, IDamageable
         {
             if (condition.type == type)
             {
+                if (condition.type == ConditionType.Health) GameManager.Instance.UIManager.damageEffect.Flash();
                 condition.Subtract(damage);
             }
         }

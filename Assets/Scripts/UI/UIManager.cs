@@ -19,6 +19,7 @@ public class UIManager : MonoBehaviour
     [Header("Conditions")]
     public ConditionUI _health;
     public ConditionUI _stamina;
+    public DamageEffect damageEffect;
     
     [Header("Inventory")]
     [SerializeField] private Transform inventoryPanel;

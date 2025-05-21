@@ -7,41 +7,52 @@ using Random = UnityEngine.Random;
 public class PlayerController : MonoBehaviour
 {
     [Header("Movement")]
-    [SerializeField] float _moveSpeed;
-    [SerializeField] float _sprintSpeed;
-    [SerializeField] float _jumpForce;
-    [SerializeField] Vector2 _curMovementInput;
-    [SerializeField] LayerMask _groundLayerMask;
-    [SerializeField] private float _sprintStamina;
-    [SerializeField] private float _jumpStamina;
-    bool _isSprinting = false;
+    [SerializeField] private float moveSpeed;
+    [SerializeField] private float sprintSpeed;
+    [SerializeField] private float jumpForce;
+    private Vector2 curMovementInput;
+    [SerializeField] private LayerMask groundLayerMask;
+    [SerializeField] private float sprintStamina;
+    [SerializeField] private float jumpStamina;
+    private bool isSprinting = false;
 
     [Header("Look")]
-    [SerializeField] Transform _cameraContainer;
-    [SerializeField] float _minXLook;
-    [SerializeField] float _maxXLook;
-    [SerializeField] float _camCurXRot;
-    [SerializeField] float _lookSensitivity;
-    [SerializeField] Vector2 _mouseDelta;
-    [SerializeField] bool _canLook = true;
+    [SerializeField] private Transform cameraContainer;
+    [SerializeField] private float minXLook;
+    [SerializeField] private float maxXLook;
+    [SerializeField] private float camCurXRot;
+    [SerializeField] private float lookSensitivity;
+    [SerializeField] private Vector2 mouseDelta;
+    [SerializeField] private bool canLook = true;
+    //3인칭 전환
+    [SerializeField] private Transform fpsCameraTarget;
+    [SerializeField] private Transform tpsCameraTarget;
+    [SerializeField] private Camera mainCamera;
+    [SerializeField] private LayerMask thirdPersonCullingMask;
+    [SerializeField] private LayerMask firstPersonCullingMask;
+    
+    private float smoothSpeed = 10f;
+    private bool isThirdPerson = false;
+    
+    private Transform currentCameraTarget;
+    private Vector3 camVelocity;
     
     [Header("Items")]
-    [SerializeField] private ItemData _curItemData;
-    [SerializeField] private Transform _dropPosition;
-    [SerializeField] private Transform _objectPool;
-    [SerializeField] private float _itemDuration;
+    [SerializeField] private ItemData curItemData;
+    [SerializeField] private Transform dropPosition;
+    [SerializeField] private Transform objectPool;
     public List<InventoryItem> items = new List<InventoryItem>();
-    private int _maxItemCount;
+    private int maxItemCount;
     
-    private float _bonusSpeed = 0f;
-    private float _bonusJumpForce = 0f;
+    private float bonusSpeed = 0f;
+    private float bonusJumpForce = 0f;
     
-    private Coroutine _speedUpCoroutine;
-    private Coroutine _jumpBoostCoroutine;
+    private Coroutine speedUpCoroutine;
+    private Coroutine jumpBoostCoroutine;
     
     private Rigidbody _rigidbody;
     
-    private readonly Dictionary<string, int> _itemButtonMap = new()
+    private readonly Dictionary<string, int> itemButtonMap = new()
     {
         { "1", 0 },
         { "2", 1 },
@@ -51,43 +62,61 @@ public class PlayerController : MonoBehaviour
     
     private void Awake()
     {
-        _cameraContainer = GetComponentInChildren<Camera>().transform.parent.transform;
+        cameraContainer = GetComponentInChildren<Camera>().transform.parent.transform;
         _rigidbody = GetComponent<Rigidbody>();
     }
     
     private void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
-        _maxItemCount = GameManager.Instance.UIManager.inventory.Length;
+        maxItemCount = GameManager.Instance.UIManager.inventory.Length;
+        currentCameraTarget = fpsCameraTarget;
     }
 
     private void Update()
     {
-        if (_isSprinting)
+        if (isSprinting)
         {
-            GameManager.Instance.Player.condition.GetCondition(ConditionType.Stamina).Subtract(Time.deltaTime * _sprintStamina);
+            GameManager.Instance.Player.condition.GetCondition(ConditionType.Stamina).Subtract(Time.deltaTime * sprintStamina);
             
             if (GameManager.Instance.Player.condition.GetCondition(ConditionType.Stamina).curValue <= 0)
             {
-                _isSprinting = false;
+                isSprinting = false;
             }
         }
     }
 
     private void FixedUpdate()
     {
+        cameraContainer.position = Vector3.Lerp
+        (
+            cameraContainer.position,
+            currentCameraTarget.position,
+            Time.deltaTime * smoothSpeed
+        );
+
+        cameraContainer.rotation = Quaternion.Slerp
+        (
+            cameraContainer.rotation,
+            currentCameraTarget.rotation,
+            Time.deltaTime * smoothSpeed
+        );
+        
         Move();
     }
 
     private void LateUpdate()
     {
-        if (_canLook) CameraLook();
+        if (canLook)
+        {
+            CameraLook();
+        }
     }
 
     private void Move()
     {
-        Vector3 dir = transform.forward * _curMovementInput.y + transform.right * _curMovementInput.x;
-        dir *= ((_moveSpeed + _bonusSpeed) * (_isSprinting ? _sprintSpeed : 1f));
+        Vector3 dir = transform.forward * curMovementInput.y + transform.right * curMovementInput.x;
+        dir *= ((moveSpeed + bonusSpeed) * (isSprinting ? sprintSpeed : 1f));
         dir.y = _rigidbody.velocity.y;
         
         _rigidbody.velocity = dir;
@@ -95,22 +124,22 @@ public class PlayerController : MonoBehaviour
 
     private void CameraLook()
     {
-        _camCurXRot += _mouseDelta.y * _lookSensitivity; //Y방향 회전은 X축을 회전하는 것이기 때문(마우스의 Y축 회전 => 오브젝트의 X방향 회전)
-        _camCurXRot = Mathf.Clamp(_camCurXRot, _minXLook, _maxXLook);
-        _cameraContainer.localEulerAngles = new Vector3(-_camCurXRot, 0, 0); //+방향 회전은 아래를 향하는 것이기 때문에 마우스 아래로 내림 = -값 이기 때문에
+        camCurXRot += mouseDelta.y * lookSensitivity; //Y방향 회전은 X축을 회전하는 것이기 때문(마우스의 Y축 회전 => 오브젝트의 X방향 회전)
+        camCurXRot = Mathf.Clamp(camCurXRot, minXLook, maxXLook);
+        cameraContainer.localEulerAngles = new Vector3(-camCurXRot, 0, 0); //+방향 회전은 아래를 향하는 것이기 때문에 마우스 아래로 내림 = -값 이기 때문에
         
-        transform.eulerAngles += new Vector3(0, _mouseDelta.x * _lookSensitivity, 0); //X방향 회전은 Y축을 회전하는 것이기 때문(마우스의 X축 회전 => 오브젝트의 Y방향 회전)
+        transform.eulerAngles += new Vector3(0, mouseDelta.x * lookSensitivity, 0); //X방향 회전은 Y축을 회전하는 것이기 때문(마우스의 X축 회전 => 오브젝트의 Y방향 회전)
     }
     
     public void OnMove(InputAction.CallbackContext context)
     {
         if (context.phase == InputActionPhase.Performed)
         {
-            _curMovementInput = context.ReadValue<Vector2>();
+            curMovementInput = context.ReadValue<Vector2>();
         }
         else if (context.phase >= InputActionPhase.Canceled)
         {
-            _curMovementInput = Vector2.zero;
+            curMovementInput = Vector2.zero;
         }
     }
 
@@ -118,41 +147,41 @@ public class PlayerController : MonoBehaviour
     {
         if (GameManager.Instance.Player.condition.GetCondition(ConditionType.Stamina).curValue <= 0)
         {
-            _isSprinting = false;
+            isSprinting = false;
             return;
         }
 
         if (context.phase == InputActionPhase.Started)
         {
-            _isSprinting = true;
+            isSprinting = true;
         }
         else if (context.phase == InputActionPhase.Canceled)
         {
-            _isSprinting = false;
+            isSprinting = false;
         }
     }
 
     public void OnJump(InputAction.CallbackContext context)
     {
-        if (GameManager.Instance.Player.condition.GetCondition(ConditionType.Stamina).curValue <= _jumpStamina) return;
+        if (GameManager.Instance.Player.condition.GetCondition(ConditionType.Stamina).curValue <= jumpStamina) return;
         if (context.phase == InputActionPhase.Started && IsGrounded())
         {
-            GameManager.Instance.Player.condition.GetCondition(ConditionType.Stamina).Subtract(_jumpStamina);
-            _rigidbody.AddForce(Vector2.up * (_jumpForce + _bonusJumpForce), ForceMode.Impulse);
+            GameManager.Instance.Player.condition.GetCondition(ConditionType.Stamina).Subtract(jumpStamina);
+            _rigidbody.AddForce(Vector2.up * (jumpForce + bonusJumpForce), ForceMode.Impulse);
         }
     }
     
     bool IsGrounded()
     {
         Ray ray = new Ray(transform.position + Vector3.up * 0.1f, Vector3.down);
-        if (Physics.Raycast(ray, 0.2f, _groundLayerMask)) return true;
+        if (Physics.Raycast(ray, 0.2f, groundLayerMask)) return true;
         
         return false;
     }
 
     public void OnLook(InputAction.CallbackContext context)
     {
-        _mouseDelta = context.ReadValue<Vector2>();
+        mouseDelta = context.ReadValue<Vector2>();
     }
 
     public void OnEscape(InputAction.CallbackContext context)
@@ -161,7 +190,7 @@ public class PlayerController : MonoBehaviour
         {
             bool toggle = Cursor.lockState == CursorLockMode.Locked;
             Cursor.lockState = toggle ? CursorLockMode.None : CursorLockMode.Locked;
-            _canLook = !toggle;
+            canLook = !toggle;
             GameManager.Instance.PauseGame();
         }
     }
@@ -174,7 +203,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    public void UseItem(InputAction.CallbackContext context)
+    public void OnUseItem(InputAction.CallbackContext context)
     {
         if (context.phase == InputActionPhase.Started)
         {
@@ -182,7 +211,7 @@ public class PlayerController : MonoBehaviour
 
             string keyName = control.name.ToLower();
 
-            if (_itemButtonMap.TryGetValue(keyName, out int index))
+            if (itemButtonMap.TryGetValue(keyName, out int index))
             {
                 UseItem(index);
             }
@@ -191,7 +220,7 @@ public class PlayerController : MonoBehaviour
     
     public void AddItem(ItemData item, int amount)
     {
-        _curItemData = item;
+        curItemData = item;
         
         if(items.Exists(i => i.itemData == item))
         {
@@ -200,7 +229,7 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            if (items.Count == _maxItemCount)
+            if (items.Count == maxItemCount)
             {
                 DropItem();
             }
@@ -215,7 +244,7 @@ public class PlayerController : MonoBehaviour
 
     private void DropItem()
     {
-        Instantiate(_curItemData.dropPrefab, _dropPosition.position, Quaternion.Euler(Vector3.one * Random.value * 360), _objectPool);
+        Instantiate(curItemData.dropPrefab, dropPosition.position, Quaternion.Euler(Vector3.one * Random.value * 360), objectPool);
     }
 
     private void UseItem(int index)
@@ -254,35 +283,45 @@ public class PlayerController : MonoBehaviour
         switch (item.type)
         {
             case ConsumableType.SpeedUp:
-                if (_speedUpCoroutine != null)
+                if (speedUpCoroutine != null)
                 {
-                    StopCoroutine(_speedUpCoroutine);
+                    StopCoroutine(speedUpCoroutine);
                 }
-                _bonusSpeed = item.value;
-                _speedUpCoroutine = StartCoroutine(HandleSpeedUp());
+                bonusSpeed = item.value;
+                speedUpCoroutine = StartCoroutine(HandleSpeedUp(item.duration));
                 break;
 
             case ConsumableType.JumpBoost:
-                if (_jumpBoostCoroutine != null)
+                if (jumpBoostCoroutine != null)
                 {
-                    StopCoroutine(_jumpBoostCoroutine);
+                    StopCoroutine(jumpBoostCoroutine);
                 }
-                _bonusJumpForce = item.value;
-                _jumpBoostCoroutine = StartCoroutine(HandleJumpBoost());
+                bonusJumpForce = item.value;
+                jumpBoostCoroutine = StartCoroutine(HandleJumpBoost(item.duration));
                 break;
             
         }
     }
 
-    private IEnumerator HandleSpeedUp()
+    private IEnumerator HandleSpeedUp(float duration)
     {
-        yield return new WaitForSeconds(_itemDuration);
-        _bonusSpeed = 0f;
+        yield return new WaitForSeconds(duration);
+        bonusSpeed = 0f;
     }
 
-    private IEnumerator HandleJumpBoost()
+    private IEnumerator HandleJumpBoost(float duration)
     {
-        yield return new WaitForSeconds(_itemDuration);
-        _bonusJumpForce = 0f;
+        yield return new WaitForSeconds(duration);
+        bonusJumpForce = 0f;
+    }
+
+    public void OnToggleView(InputAction.CallbackContext context)
+    {
+        if (context.phase == InputActionPhase.Started)
+        {
+            isThirdPerson = !isThirdPerson;
+            currentCameraTarget = isThirdPerson ? tpsCameraTarget : fpsCameraTarget;
+            mainCamera.cullingMask = isThirdPerson ? thirdPersonCullingMask : firstPersonCullingMask;
+        }
     }
 }
