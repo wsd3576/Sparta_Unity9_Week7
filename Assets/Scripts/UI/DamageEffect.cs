@@ -4,8 +4,8 @@ using UnityEngine.UI;
 
 public class DamageEffect : MonoBehaviour
 {
-    public Image image;
-    public float flashSpeed;
+    [SerializeField] private Image image;
+    [SerializeField] private float flashSpeed = 0.5f;
     
     private Coroutine _coroutine;
 

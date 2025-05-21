@@ -1162,6 +1162,7 @@ MonoBehaviour:
   dropPosition: {fileID: 1579959958}
   objectPool: {fileID: 976102805}
   items: []
+  maxItemCount: 4
 --- !u!114 &387141469
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1716,7 +1717,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   type: 1
   uiBar: {fileID: 2142824410}
-  playerCondition: {fileID: 0}
 --- !u!1 &570918761
 GameObject:
   m_ObjectHideFlags: 0
@@ -3801,7 +3801,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   type: 0
   uiBar: {fileID: 950167469}
-  playerCondition: {fileID: 0}
 --- !u!1 &1564666265
 GameObject:
   m_ObjectHideFlags: 0

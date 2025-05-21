@@ -5,11 +5,11 @@ public class ItemObject : MonoBehaviour, IInteractable
     [SerializeField] private ItemData data;
     [SerializeField] private int amount;
 
-    public (string, string) GetObjectInfo()
+    public (string, string, int) GetObjectInfo()
     {
         string str1 = $"{data.itemName}";
         string str2 = $"{data.itemDescription}";
-        return (str1, str2);
+        return (str1, str2, amount);
     }
 
     public void OnInteractInput()

@@ -14,7 +14,7 @@ public class JumperObject : MonoBehaviour
         {
             _rigidbody = other.gameObject.GetComponent<Rigidbody>();
             
-            if (other.relativeVelocity.y < -1f)
+            if (other.relativeVelocity.y < -1f) //플레이어가 밑으로 내려온 상황에만 점프시킨다.
             {
                 _rigidbody.AddForce(Vector2.up * (jumpPower), ForceMode.Impulse);
             }

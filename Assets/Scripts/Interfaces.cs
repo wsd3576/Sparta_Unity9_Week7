@@ -5,6 +5,6 @@ public interface IDamageable
 
 public interface IInteractable
 {
-    public (string, string) GetObjectInfo();
+    public (string, string, int) GetObjectInfo();
     public void OnInteractInput();
 }

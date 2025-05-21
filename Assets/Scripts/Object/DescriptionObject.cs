@@ -7,13 +7,10 @@ public class DescriptionObject : MonoBehaviour, IInteractable
     [SerializeField] private string objectName;
     [SerializeField] private string objectDescription;
     
-    public (string, string) GetObjectInfo()
+    public (string, string, int) GetObjectInfo()
     {
-        return (objectName, objectDescription);
+        return (objectName, objectDescription, 0);
     }
 
-    public void OnInteractInput()
-    {
-        //활성화?
-    }
+    public void OnInteractInput() { }
 }

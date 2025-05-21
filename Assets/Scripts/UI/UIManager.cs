@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class UIManager : MonoBehaviour
@@ -17,8 +18,8 @@ public class UIManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI objectDescriptionText;
     
     [Header("Conditions")]
-    public ConditionUI _health;
-    public ConditionUI _stamina;
+    [SerializeField] private ConditionUI _health;
+    [SerializeField] private ConditionUI _stamina;
     public DamageEffect damageEffect;
     
     [Header("Inventory")]
@@ -61,57 +62,19 @@ public class UIManager : MonoBehaviour
     
     public void UpdateInventory(List<InventoryItem> items)
     {
-        foreach (ItemSlot slot in inventory)
+        //인벤토리에 아이템들을 넣고 상태 업데이트.(슬롯이 부족해도 가능 슬롯이 넘쳐나도 가능)
+        for (int i = 0; i < inventory.Length; i++)
         {
-            slot.currentItem = null;
-        }
-        
-        foreach (var item in items)
-        {
-            ItemSlot slot = GetCurItemSlot(item.itemData);
-            if (slot != null) continue;
-        
-            ItemSlot emptySlot = GetEmptySlot();
-            if (emptySlot != null)
+            if (i < items.Count)
             {
-                emptySlot.currentItem = item;
-            }
-        }
-        
-        foreach (ItemSlot slot in inventory)
-        {
-            if (slot.currentItem != null)
-            {
-                slot.SetSlot();
+                inventory[i].currentItem = items[i];
+                inventory[i].SetSlot();
             }
             else
             {
-                slot.ClearSlot();
+                inventory[i].currentItem = null;
+                inventory[i].ClearSlot();
             }
         }
-    }
-    
-    ItemSlot GetCurItemSlot(ItemData data)
-    {
-        foreach (ItemSlot slot in inventory)
-        {
-            if (slot.currentItem != null && slot.currentItem.itemData == data)
-            {
-                return slot;
-            }
-        }
-        return null;
-    }
-    
-    ItemSlot GetEmptySlot()
-    {
-        foreach (ItemSlot slot in inventory)
-        {
-            if (slot.currentItem == null)
-            {
-                return slot;
-            }
-        }
-        return null;
     }
 }

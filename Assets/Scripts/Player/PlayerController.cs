@@ -27,7 +27,7 @@ public class PlayerController : MonoBehaviour
     //3인칭 전환
     [SerializeField] private Transform fpsCameraTarget;
     [SerializeField] private Transform tpsCameraTarget;
-    [SerializeField] private Camera camera;
+    [SerializeField] private new Camera camera;
     [SerializeField] private LayerMask thirdPersonCullingMask;
     [SerializeField] private LayerMask firstPersonCullingMask;
     
@@ -41,8 +41,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private ItemData curItemData;
     [SerializeField] private Transform dropPosition;
     [SerializeField] private Transform objectPool;
-    public List<InventoryItem> items = new List<InventoryItem>();
-    private int maxItemCount;
+    [SerializeField] private List<InventoryItem> items = new List<InventoryItem>();
+    [SerializeField] private int maxItemCount = 4;
     
     private float bonusSpeed = 0f;
     private float bonusJumpForce = 0f;
@@ -69,7 +69,6 @@ public class PlayerController : MonoBehaviour
     private void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
-        maxItemCount = GameManager.Instance.UIManager.inventory.Length;
         currentCameraTarget = fpsCameraTarget;
     }
 
