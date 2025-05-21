@@ -2812,10 +2812,10 @@ GameObject:
   - component: {fileID: 990839369}
   - component: {fileID: 990839368}
   - component: {fileID: 990839367}
-  - component: {fileID: 990839366}
-  - component: {fileID: 990839365}
-  - component: {fileID: 990839370}
   - component: {fileID: 990839371}
+  - component: {fileID: 990839365}
+  - component: {fileID: 990839366}
+  - component: {fileID: 990839370}
   m_Layer: 8
   m_Name: MovingPlatform
   m_TagString: Untagged
