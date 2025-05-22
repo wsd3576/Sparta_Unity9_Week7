@@ -163,7 +163,7 @@ public class PlayerController : MonoBehaviour
         }
     }
     
-    bool IsGrounded()
+    public bool IsGrounded()
     {
         Ray ray = new Ray(transform.position + Vector3.up * 0.1f, Vector3.down);
         if (Physics.Raycast(ray, 0.2f, groundLayerMask)) return true;

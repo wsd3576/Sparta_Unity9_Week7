@@ -43,7 +43,7 @@ public class PlayerInteraction : MonoBehaviour
             {
                 curInteractGameObject = hit.collider.gameObject;
                 curInteractable = hit.collider.GetComponent<IInteractable>();
-                GameManager.Instance.UIManager.ShowObjectInfo(curInteractable);
+                if (curInteractable != null) GameManager.Instance.UIManager.ShowObjectInfo(curInteractable);
             }
         }
         else
