@@ -60,7 +60,7 @@ public class PlayerWallClimb : MonoBehaviour
         ConditionData stamina = GameManager.Instance.Player.condition.GetCondition(ConditionType.Stamina);
         if (stamina.curValue >= climbStamina)
         {
-            rb.AddForce(Vector3.up * climbSpeed, ForceMode.VelocityChange);
+            rb.AddForce(Vector3.up * climbSpeed, ForceMode.Force);
             stamina.Subtract(Time.deltaTime * climbStamina);
         }
     }
