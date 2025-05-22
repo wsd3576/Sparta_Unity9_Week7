@@ -2,8 +2,10 @@ using UnityEngine;
 
 public class ItemObject : MonoBehaviour, IInteractable
 {
-    [SerializeField] private ItemData data;
-    [SerializeField] private int amount;
+    public ItemObjectPool pool;
+    public ItemData data;
+    public int amount;
+    public int index;
 
     public (string, string, int) GetObjectInfo()
     {
@@ -14,7 +16,15 @@ public class ItemObject : MonoBehaviour, IInteractable
 
     public void OnInteractInput()
     {
-        GameManager.Instance.Player.playerInteraction.AddItem(data, amount);
-        Destroy(gameObject);
+        pool = FindObjectOfType<ItemObjectPool>();
+        if (pool != null)
+        {
+            pool.Return(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+        GameManager.Instance.Player.playerInteraction.AddItem(gameObject, amount);
     }
 }

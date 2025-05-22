@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerInteraction : MonoBehaviour
@@ -22,9 +23,12 @@ public class PlayerInteraction : MonoBehaviour
     private IInteractable curInteractable;
 
     [Header("Items")]
+    [SerializeField] private ItemObjectPool itemObjectPool;
+    [SerializeField] private GameObject curItem;
+    [SerializeField] private ItemObject curItemObject;
     [SerializeField] private ItemData curItemData;
+    
     [SerializeField] private Transform dropPosition;
-    [SerializeField] private Transform objectPool;
     [SerializeField] private List<InventoryItem> items = new List<InventoryItem>();
     [SerializeField] private int maxItemCount = 4;
     
@@ -77,24 +81,27 @@ public class PlayerInteraction : MonoBehaviour
         }
     }
 
-    public void AddItem(ItemData item, int amount)
+    public void AddItem(GameObject item, int amount)
     {
-        curItemData = item;
+        curItem = item;
+        curItemObject = item.GetComponent<ItemObject>();
+        curItemData = curItemObject.data;
 
-        if (items.Exists(i => i.itemData == item))
+        if (items.Exists(i => i.itemData == curItemData))
         {
-            InventoryItem existingItem = items.Find(i => i.itemData == item);
+            InventoryItem existingItem = items.Find(i => i.itemData == curItemData);
             existingItem.quantity += amount;
         }
         else
         {
             if (items.Count == maxItemCount)
             {
+                Debug.Log("Dropped");
                 DropItem();
             }
             else
             {
-                items.Add(new InventoryItem(item, amount));
+                items.Add(new InventoryItem(curItemData, amount));
             }
         }
 
@@ -103,13 +110,9 @@ public class PlayerInteraction : MonoBehaviour
 
     private void DropItem()
     {
-        Instantiate
-            (
-                curItemData.dropPrefab, 
-                dropPosition.position, 
-                Quaternion.Euler(Vector3.one * Random.value * 360), 
-                objectPool
-            );
+        GameObject obj = itemObjectPool.Get(curItemObject);
+        obj.transform.position = dropPosition.position;
+        obj.transform.rotation = Quaternion.Euler(Vector3.one * Random.value * 360);
     }
 
     public void UseItem(int index)

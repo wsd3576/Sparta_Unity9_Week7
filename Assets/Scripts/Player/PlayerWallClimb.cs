@@ -53,12 +53,11 @@ public class PlayerWallClimb : MonoBehaviour
 
         Vector3 rayOrigin = transform.position + (Vector3.up * rayOffSetY);
         Vector3 direction = cameraContainer.forward;
-        Debug.DrawRay(rayOrigin, direction, Color.red);
+        
         if (Physics.Raycast(transform.position, direction, out hit, wallCheckDistance, wallLayer))
         {
             if (climbingInput && !isClimbing)
             {
-                Debug.Log("Inputted");
                 StartClimbing();
             }
         }
@@ -80,7 +79,6 @@ public class PlayerWallClimb : MonoBehaviour
     
     void StartClimbing()
     {
-        Debug.Log("Starting climbing");
         isClimbing = true;
         rb.useGravity = false;
         rb.velocity = Vector3.zero;
@@ -89,7 +87,6 @@ public class PlayerWallClimb : MonoBehaviour
     
     void StopClimbing()
     {
-        Debug.Log("StopClimbing");
         isClimbing = false;
         rb.useGravity = true;
     }
