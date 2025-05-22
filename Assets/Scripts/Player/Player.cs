@@ -2,15 +2,15 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    public PlayerController controller;
-    public PlayerCondition condition;
-    public PlayerInteraction interaction;
+    public PlayerController playerController;
+    public PlayerCondition playerCondition;
+    public PlayerInteraction playerInteraction;
     
     private void Awake()
     {
         GameManager.Instance.Player = this;
-        controller = GetComponent<PlayerController>();
-        condition = GetComponent<PlayerCondition>();
-        interaction = GetComponent<PlayerInteraction>();
+        playerController = GetComponent<PlayerController>();
+        playerCondition = GetComponent<PlayerCondition>();
+        playerInteraction = GetComponent<PlayerInteraction>();
     }
 }

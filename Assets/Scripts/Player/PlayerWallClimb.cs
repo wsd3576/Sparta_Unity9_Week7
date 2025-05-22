@@ -1,7 +1,11 @@
+using System;
 using UnityEngine;
 
 public class PlayerWallClimb : MonoBehaviour
 {
+    private PlayerCondition playerCondition;
+    private ConditionData stamina;
+    
     [Header("Settings")]
     public float wallCheckDistance = 1f;
 
@@ -24,13 +28,19 @@ public class PlayerWallClimb : MonoBehaviour
         rb = GetComponent<Rigidbody>();
     }
 
+    private void Start()
+    {
+        playerCondition = GameManager.Instance.Player.playerCondition;
+        stamina = playerCondition.GetCondition(ConditionType.Stamina);
+    }
+
     void Update()
     {
         climbingInput = Input.GetKey(KeyCode.Space);
         
         WallCheck();
 
-        if (isClimbing && climbingInput)
+        if (isClimbing && climbingInput && !stamina.exhausted)
         {
             ClimbWall();
         }
@@ -57,14 +67,13 @@ public class PlayerWallClimb : MonoBehaviour
     
     void ClimbWall()
     {
-        ConditionData stamina = GameManager.Instance.Player.condition.GetCondition(ConditionType.Stamina);
-        if (stamina.curValue >= climbStamina)
+        if (stamina.curValue >= climbStamina && !stamina.exhausted)
         {
-            float targetSpeed = climbSpeed;
-            float currentSpeed = rb.velocity.y;
-            float speedDiff = targetSpeed - currentSpeed;
+            Vector3 targetVelocity = rb.velocity;
+            targetVelocity.y = climbSpeed;
             
-            rb.AddForce(Vector3.up * speedDiff, ForceMode.VelocityChange);
+            rb.velocity = targetVelocity;
+            
             stamina.Subtract(Time.deltaTime * climbStamina);
         }
     }

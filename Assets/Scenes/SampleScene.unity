@@ -196,7 +196,7 @@ GameObject:
   - component: {fileID: 46241139}
   - component: {fileID: 46241142}
   - component: {fileID: 46241141}
-  m_Layer: 9
+  m_Layer: 6
   m_Name: Avatar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1087,7 +1087,7 @@ CapsuleCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 387141463}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: b4f002ccf1ad1e541bba3f78e0e1facf, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -1140,30 +1140,20 @@ MonoBehaviour:
   jumpForce: 100
   groundLayerMask:
     serializedVersion: 2
-    m_Bits: 439
+    m_Bits: 951
   sprintStamina: 10
   jumpStamina: 10
-  cameraContainer: {fileID: 732692373}
   minXLook: -85
-  maxXLook: 80
-  camCurXRot: 0
+  maxXLook: 85
   lookSensitivity: 0.5
-  mouseDelta: {x: 0, y: 0}
-  canLook: 1
   fpsCameraTarget: {fileID: 1033368546}
   tpsCameraTarget: {fileID: 379365628}
-  camera: {fileID: 2086975197}
   thirdPersonCullingMask:
     serializedVersion: 2
     m_Bits: 4294967295
   firstPersonCullingMask:
     serializedVersion: 2
-    m_Bits: 1527
-  curItemData: {fileID: 0}
-  dropPosition: {fileID: 1579959958}
-  objectPool: {fileID: 976102805}
-  items: []
-  maxItemCount: 4
+    m_Bits: 951
 --- !u!114 &387141469
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1182,11 +1172,13 @@ MonoBehaviour:
     startValue: 50
     maxValue: 100
     passiveValue: 5
+    exhausted: 0
   - type: 1
     curValue: 0
     startValue: 50
     maxValue: 100
     passiveValue: 5
+    exhausted: 0
 --- !u!114 &387141470
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1199,9 +1191,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f82d327ac54bd884fa6e6ae8dc5b248f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  controller: {fileID: 0}
-  condition: {fileID: 0}
-  interaction: {fileID: 0}
+  playerController: {fileID: 0}
+  playerCondition: {fileID: 0}
+  playerInteraction: {fileID: 0}
 --- !u!114 &387141471
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1219,7 +1211,11 @@ MonoBehaviour:
   layerMask:
     serializedVersion: 2
     m_Bits: 256
-  curInteractGameObject: {fileID: 0}
+  curItemData: {fileID: 0}
+  dropPosition: {fileID: 1579959958}
+  objectPool: {fileID: 976102805}
+  items: []
+  maxItemCount: 4
 --- !u!114 &387141472
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1235,10 +1231,10 @@ MonoBehaviour:
   wallCheckDistance: 1
   rayOffSetY: 1.7
   climbSpeed: 3
-  climbStamina: 5
+  climbStamina: 10
   wallLayer:
     serializedVersion: 2
-    m_Bits: 1024
+    m_Bits: 512
   cameraContainer: {fileID: 732692373}
 --- !u!1 &491273802
 GameObject:
@@ -3395,7 +3391,7 @@ GameObject:
   - component: {fileID: 1319792252}
   - component: {fileID: 1319792251}
   - component: {fileID: 1319792250}
-  m_Layer: 10
+  m_Layer: 9
   m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4667,7 +4663,7 @@ Camera:
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 1527
+    m_Bits: 4294967295
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0

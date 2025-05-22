@@ -26,6 +26,7 @@ public class PlayerCondition : MonoBehaviour, IDamageable
         {
             if (condition.type == type)
             {
+                condition.GetExhausted();
                 return condition;
             }
         }

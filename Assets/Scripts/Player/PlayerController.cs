@@ -6,28 +6,38 @@ using Random = UnityEngine.Random;
 
 public class PlayerController : MonoBehaviour
 {
+    private PlayerCondition playerCondition;
+    private PlayerInteraction playerInteraction;
+    private ConditionData stamina;
+    
     [Header("Movement")]
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private float sprintSpeed = 1.5f;
     [SerializeField] private float jumpForce = 100f;
-    private Vector2 curMovementInput;
     [SerializeField] private LayerMask groundLayerMask;
+    
+    private Vector2 curMovementInput;
+    
+    [Header("Movement Plus")]
     [SerializeField] private float sprintStamina = 10f;
     [SerializeField] private float jumpStamina = 10f;
+    
     private bool isSprinting = false;
 
     [Header("Look")]
-    [SerializeField] private Transform cameraContainer;
     [SerializeField] private float minXLook = -85f;
     [SerializeField] private float maxXLook = 85f;
-    [SerializeField] private float camCurXRot;
     [SerializeField] private float lookSensitivity = 0.5f;
-    [SerializeField] private Vector2 mouseDelta;
-    [SerializeField] private bool canLook = true;
+    
+    private new Camera camera;
+    private Transform cameraContainer;
+    private Vector2 mouseDelta;
+    private float camCurXRot;
+    private bool canLook = true;
+    
     //3인칭 전환
     [SerializeField] private Transform fpsCameraTarget;
     [SerializeField] private Transform tpsCameraTarget;
-    [SerializeField] private new Camera camera;
     [SerializeField] private LayerMask thirdPersonCullingMask;
     [SerializeField] private LayerMask firstPersonCullingMask;
     
@@ -36,13 +46,6 @@ public class PlayerController : MonoBehaviour
     private bool isThirdPerson = false;
     
     private Transform currentCameraTarget;
-    
-    [Header("Items")]
-    [SerializeField] private ItemData curItemData;
-    [SerializeField] private Transform dropPosition;
-    [SerializeField] private Transform objectPool;
-    [SerializeField] private List<InventoryItem> items = new List<InventoryItem>();
-    [SerializeField] private int maxItemCount = 4;
     
     private float bonusSpeed = 0f;
     private float bonusJumpForce = 0f;
@@ -62,26 +65,31 @@ public class PlayerController : MonoBehaviour
     
     private void Awake()
     {
+        camera = Camera.main;
         cameraContainer = GetComponentInChildren<Camera>().transform.parent.transform;
         _rigidbody = GetComponent<Rigidbody>();
+        camera.cullingMask = firstPersonCullingMask;
     }
     
     private void Start()
     {
+        playerCondition = GameManager.Instance.Player.playerCondition;
+        playerInteraction = GameManager.Instance.Player.playerInteraction;
+        
         Cursor.lockState = CursorLockMode.Locked;
         currentCameraTarget = fpsCameraTarget;
     }
 
     private void Update()
     {
+        stamina = playerCondition.GetCondition(ConditionType.Stamina);
         if (isSprinting)
         {
-            GameManager.Instance.Player.condition.GetCondition(ConditionType.Stamina).Subtract(Time.deltaTime * sprintStamina);
-            
-            if (GameManager.Instance.Player.condition.GetCondition(ConditionType.Stamina).curValue <= 0)
-            {
-                isSprinting = false;
-            }
+            stamina.Subtract(Time.deltaTime * sprintStamina);
+        }
+        if (stamina.curValue <= 0f || stamina.exhausted)
+        {
+            isSprinting = false;
         }
     }
 
@@ -137,12 +145,6 @@ public class PlayerController : MonoBehaviour
 
     public void OnSprint(InputAction.CallbackContext context)
     {
-        if (GameManager.Instance.Player.condition.GetCondition(ConditionType.Stamina).curValue <= 0)
-        {
-            isSprinting = false;
-            return;
-        }
-
         if (context.phase == InputActionPhase.Started)
         {
             isSprinting = true;
@@ -155,10 +157,11 @@ public class PlayerController : MonoBehaviour
 
     public void OnJump(InputAction.CallbackContext context)
     {
-        if (GameManager.Instance.Player.condition.GetCondition(ConditionType.Stamina).curValue <= jumpStamina) return;
+        if (stamina.curValue <= jumpStamina || stamina.exhausted) return;
+        
         if (context.phase == InputActionPhase.Started && IsGrounded())
         {
-            GameManager.Instance.Player.condition.GetCondition(ConditionType.Stamina).Subtract(jumpStamina);
+            playerCondition.GetCondition(ConditionType.Stamina).Subtract(jumpStamina);
             _rigidbody.AddForce(Vector2.up * (jumpForce + bonusJumpForce), ForceMode.Impulse);
         }
     }
@@ -167,7 +170,6 @@ public class PlayerController : MonoBehaviour
     {
         Ray ray = new Ray(transform.position + Vector3.up * 0.1f, Vector3.down);
         if (Physics.Raycast(ray, 0.2f, groundLayerMask)) return true;
-        
         return false;
     }
 
@@ -191,7 +193,7 @@ public class PlayerController : MonoBehaviour
     {
         if (context.phase == InputActionPhase.Started)
         {
-            GameManager.Instance.Player.interaction.OnInteractInput();
+            playerInteraction.OnInteractInput();
         }
     }
 
@@ -205,72 +207,22 @@ public class PlayerController : MonoBehaviour
 
             if (itemButtonMap.TryGetValue(keyName, out int index))
             {
-                UseItem(index);
+                playerInteraction.UseItem(index);
             }
         }
     }
     
-    public void AddItem(ItemData item, int amount)
+    public void OnToggleView(InputAction.CallbackContext context)
     {
-        curItemData = item;
-        
-        if(items.Exists(i => i.itemData == item))
+        if (context.phase == InputActionPhase.Started)
         {
-            InventoryItem existingItem = items.Find(i => i.itemData == item);
-            existingItem.quantity += amount;
+            isThirdPerson = !isThirdPerson;
+            currentCameraTarget = isThirdPerson ? tpsCameraTarget : fpsCameraTarget;
+            camera.cullingMask = isThirdPerson ? thirdPersonCullingMask : firstPersonCullingMask;
         }
-        else
-        {
-            if (items.Count == maxItemCount)
-            {
-                DropItem();
-            }
-            else
-            {
-                items.Add(new InventoryItem(item, amount));
-            }
-        }
-
-        GameManager.Instance.UIManager.UpdateInventory(items);
     }
-
-    private void DropItem()
-    {
-        Instantiate(curItemData.dropPrefab, dropPosition.position, Quaternion.Euler(Vector3.one * Random.value * 360), objectPool);
-    }
-
-    private void UseItem(int index)
-    {
-        if (index >= items.Count) return;
-        if (items[index].itemData.type == ItemType.Consumable)
-        {
-            items[index].quantity--;
-            
-            foreach (var con in items[index].itemData.consumables)
-            {
-                switch (con.type)
-                {
-                    case ConsumableType.Stamina:
-                        GameManager.Instance.Player.condition.GetCondition(ConditionType.Stamina).Add(con.value);
-                        break;
-                    case ConsumableType.Health:
-                        GameManager.Instance.Player.condition.GetCondition(ConditionType.Health).Add(con.value);
-                        break;
-                    case ConsumableType.SpeedUp:
-                    case ConsumableType.JumpBoost:
-                        ItemBoost(con); 
-                        break;
-                }
-            }
-            if (items[index].quantity <= 0)
-            {
-                items.Remove(items[index]);
-            }
-        }
-        GameManager.Instance.UIManager.UpdateInventory(items);
-    }
-
-    private void ItemBoost(ItemDataConsumable item)
+    
+    public void ItemBoost(ItemDataConsumable item)
     {
         switch (item.type)
         {
@@ -279,6 +231,7 @@ public class PlayerController : MonoBehaviour
                 {
                     StopCoroutine(speedUpCoroutine);
                 }
+
                 bonusSpeed = item.value;
                 speedUpCoroutine = StartCoroutine(HandleSpeedUp(item.duration));
                 break;
@@ -288,10 +241,10 @@ public class PlayerController : MonoBehaviour
                 {
                     StopCoroutine(jumpBoostCoroutine);
                 }
+
                 bonusJumpForce = item.value;
                 jumpBoostCoroutine = StartCoroutine(HandleJumpBoost(item.duration));
                 break;
-            
         }
     }
 
@@ -307,13 +260,5 @@ public class PlayerController : MonoBehaviour
         bonusJumpForce = 0f;
     }
 
-    public void OnToggleView(InputAction.CallbackContext context)
-    {
-        if (context.phase == InputActionPhase.Started)
-        {
-            isThirdPerson = !isThirdPerson;
-            currentCameraTarget = isThirdPerson ? tpsCameraTarget : fpsCameraTarget;
-            camera.cullingMask = isThirdPerson ? thirdPersonCullingMask : firstPersonCullingMask;
-        }
-    }
+
 }

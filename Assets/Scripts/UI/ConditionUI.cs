@@ -8,13 +8,11 @@ public class ConditionUI : MonoBehaviour
 {
     [SerializeField] private ConditionType type;
     [SerializeField] private Image uiBar;
-    private PlayerCondition playerCondition;
     private ConditionData condition;
 
     private void Start()
     {
-        playerCondition = GameManager.Instance.Player.condition;
-        condition = playerCondition.GetCondition(type); //본인의 타입과 같은 플레이어의 상태값을 가져온다.
+        condition = GameManager.Instance.Player.playerCondition.GetCondition(type); //본인의 타입과 같은 플레이어의 상태값을 가져온다.
     }
 
     private void Update()
