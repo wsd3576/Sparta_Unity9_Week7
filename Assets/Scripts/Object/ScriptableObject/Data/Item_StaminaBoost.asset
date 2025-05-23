@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemName: "\uC2A4\uD0DC\uBBF8\uB098 \uD3EC\uC158"
   itemDescription: "\uC554\uD2BC \uD3EC\uC158"
-  type: 1
+  type: 0
   icon: {fileID: 21300000, guid: e12e1a0e4a7453c42932e826264d0473, type: 3}
   dropPrefab: {fileID: 6126580471335198407, guid: 69b36bd9daa6e6341b9d92cbb30959f3, type: 3}
   consumables:
   - type: 0
     value: 30
-  equipPrefab: {fileID: 0}
+    duration: 0

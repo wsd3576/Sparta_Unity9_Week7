@@ -212,7 +212,7 @@ public class PlayerController : MonoBehaviour
         {
             var control = context.control;
 
-            string keyName = control.name.ToLower();
+            string keyName = control.name;
 
             if (itemButtonMap.TryGetValue(keyName, out int index))
             {

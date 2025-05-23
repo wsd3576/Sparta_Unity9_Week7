@@ -3,16 +3,16 @@ using UnityEngine;
 
 public class ItemObjectPool : MonoBehaviour
 {
-    private ItemObject[] itemPrefabs;
+    private ItemObject[] itemObjects;
     private List<GameObject> pool = new();
 
     private void Start()
     {
         //ItemObejct가 있는 오브젝트만 받아오고 순서 부여
-        itemPrefabs = GetComponentsInChildren<ItemObject>();
-        for (int i = 0; i < itemPrefabs.Length; i++)
+        itemObjects = GetComponentsInChildren<ItemObject>();
+        for (int i = 0; i < itemObjects.Length; i++)
         {
-            itemPrefabs[i].index = i;
+            itemObjects[i].index = i;
         }
     }
 

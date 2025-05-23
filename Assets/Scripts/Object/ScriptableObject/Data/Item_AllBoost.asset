@@ -15,7 +15,7 @@ MonoBehaviour:
   itemName: "\uC62C\uBD80\uC2A4\uD2B8"
   itemDescription: "\uC2A4\uD14C\uBBF8\uB108 \uD68C\uBCF5, \uC18D\uB3C4 \uC99D\uAC00,
     \uC810\uD504 \uAC15\uD654."
-  type: 1
+  type: 0
   icon: {fileID: 21300000, guid: 43046426625693b41b1c2ee199d4c15a, type: 3}
   dropPrefab: {fileID: 801129809252025735, guid: 4c12f0bec2d4c784296997ae62246f05, type: 3}
   consumables:
@@ -28,4 +28,3 @@ MonoBehaviour:
   - type: 2
     value: 200
     duration: 10
-  equipPrefab: {fileID: 0}
