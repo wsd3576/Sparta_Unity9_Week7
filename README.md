@@ -33,3 +33,8 @@
 
 - **벽 타기 및 매달리기**  
   관련 스크립트: `PlayerWallClimb`
+
+### 기타 기능
+
+- **오브젝트 풀**  
+  관련 스크립트: `ItemObjectPool`, `ItemObject`, `PlayerInteraction`
