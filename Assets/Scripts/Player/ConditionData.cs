@@ -17,12 +17,12 @@ public class ConditionData
     public float passiveValue;
     public bool exhausted = false;
 
-    public void ResetCondition()
+    public void ResetCondition() //초기화
     { 
         curValue = startValue;
     }
 
-    public float GetPercentage()
+    public float GetPercentage() //UI용 퍼센트 반환
     {
         return curValue / maxValue;
     }
@@ -37,7 +37,7 @@ public class ConditionData
         curValue = Mathf.Max(curValue - value, 0);
     }
 
-    public void GetExhausted()
+    public void GetExhausted() //지침 상태
     {
         if (curValue / maxValue < 0.01f)
         {

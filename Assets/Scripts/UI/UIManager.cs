@@ -15,6 +15,7 @@ public class UIManager : MonoBehaviour
     }
     [SerializeField] private TextMeshProUGUI objectNameText;
     [SerializeField] private TextMeshProUGUI objectDescriptionText;
+    [SerializeField] private TextMeshProUGUI amountText;
     
     [Header("Conditions")]
     [SerializeField] private ConditionUI _health;
@@ -54,9 +55,8 @@ public class UIManager : MonoBehaviour
 
     public void ShowObjectInfo(IInteractable interactable)
     {
-        infoPanel.SetActive(true); 
-        objectNameText.text = interactable.GetObjectInfo().Item1;
-        objectDescriptionText.text = interactable.GetObjectInfo().Item2;
+        infoPanel.SetActive(true);
+        (objectNameText.text, objectDescriptionText.text, amountText.text) = interactable.GetObjectInfo();
     }
     
     public void UpdateInventory(List<InventoryItem> items)

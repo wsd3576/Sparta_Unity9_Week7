@@ -23,9 +23,6 @@ public class PlayerInteraction : MonoBehaviour
 
     [Header("Items")]
     [SerializeField] private ItemObjectPool itemObjectPool;
-    [SerializeField] private GameObject curItem;
-    [SerializeField] private ItemObject curItemObject;
-    [SerializeField] private ItemData curItemData;
     
     [SerializeField] private Transform dropPosition;
     [SerializeField] private List<InventoryItem> items = new List<InventoryItem>();
@@ -82,10 +79,11 @@ public class PlayerInteraction : MonoBehaviour
 
     public void AddItem(GameObject item, int amount)
     {
-        curItem = item;
-        curItemObject = item.GetComponent<ItemObject>();
-        curItemData = curItemObject.data;
+        //얻으려는 아이템 데이터를 받아온다.
+        ItemObject curItemObject = item.GetComponent<ItemObject>();
+        ItemData curItemData = curItemObject.data;
 
+        //기존 아이템과 일치하는 아이템이면 습득
         if (items.Exists(i => i.itemData == curItemData))
         {
             InventoryItem existingItem = items.Find(i => i.itemData == curItemData);
@@ -93,12 +91,13 @@ public class PlayerInteraction : MonoBehaviour
         }
         else
         {
-            if (items.Count == maxItemCount)
+            //기존 아이템과 일치하지 않을때
+            if (items.Count == maxItemCount) //인벤토리가 가득 찼다면 버린다.
             {
                 Debug.Log("Dropped");
-                DropItem();
+                DropItem(curItemObject);
             }
-            else
+            else //아니면 새로 추가한다.
             {
                 items.Add(new InventoryItem(curItemData, amount));
             }
@@ -107,9 +106,11 @@ public class PlayerInteraction : MonoBehaviour
         GameManager.Instance.UIManager.UpdateInventory(items);
     }
 
-    private void DropItem()
+    private void DropItem(ItemObject dropItem)
     {
-        GameObject obj = itemObjectPool.Get(curItemObject);
+        //기존의 비활성화 시킨 아이템을 오브젝트 풀에서 받아온다.
+        GameObject obj = itemObjectPool.Get(dropItem);
+        //버린다.
         obj.transform.position = dropPosition.position;
         obj.transform.rotation = Quaternion.Euler(Vector3.one * Random.value * 360);
     }
@@ -120,9 +121,10 @@ public class PlayerInteraction : MonoBehaviour
         if (items[index].itemData.type == ItemType.Consumable)
         {
             items[index].quantity--;
-
+            
             foreach (var con in items[index].itemData.consumables)
             {
+                //단순 회복은 이곳에서 처리.
                 switch (con.type)
                 {
                     case ConsumableType.Stamina:
@@ -131,6 +133,7 @@ public class PlayerInteraction : MonoBehaviour
                     case ConsumableType.Health:
                         playerCondition.GetCondition(ConditionType.Health).Add(con.value);
                         break;
+                    //속도 및 점프 증가는 PlayerController에서 처리
                     case ConsumableType.SpeedUp:
                     case ConsumableType.JumpBoost:
                         playerController.ItemBoost(con);

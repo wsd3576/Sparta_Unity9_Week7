@@ -1,13 +1,12 @@
 using System;
 using UnityEngine;
 
-public enum ItemType
+public enum ItemType //다른 아이템 종류 추가시 사용할 열거형
 {
-    Equipable,
     Consumable
 }
 
-public enum ConsumableType
+public enum ConsumableType //소모품의 종류 열거형
 {
     Stamina,
     SpeedUp,
@@ -16,20 +15,20 @@ public enum ConsumableType
 }
 
 [Serializable]
-public class InventoryItem
+public class InventoryItem //인벤토리에 저장용
 {
     public ItemData itemData;
     public int quantity;
 
-    public InventoryItem(ItemData data, int qty)
+    public InventoryItem(ItemData itemData, int quantity)
     {
-        itemData = data;
-        quantity = qty;
+        this.itemData = itemData;
+        this.quantity = quantity;
     }
 }
 
 [Serializable]
-public class ItemDataConsumable
+public class ItemDataConsumable //각 아이템별 추가할 속성값
 {
     public ConsumableType type;
     public float value;
@@ -37,7 +36,7 @@ public class ItemDataConsumable
 }
 
 [CreateAssetMenu(fileName = "Item", menuName = "New Item")]
-public class ItemData : ScriptableObject
+public class ItemData : ScriptableObject //아이템의 정보
 {
     [Header("Info")]
     public string itemName;
@@ -49,7 +48,4 @@ public class ItemData : ScriptableObject
 
     [Header("Consumable")]
     public ItemDataConsumable[] consumables;
-    
-    [Header("Equip")]
-    public GameObject equipPrefab;
 }

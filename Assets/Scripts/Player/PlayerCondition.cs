@@ -6,7 +6,7 @@ public class PlayerCondition : MonoBehaviour, IDamageable
 
     private void Start()
     {
-        foreach (ConditionData condition in conditions)
+        foreach (ConditionData condition in conditions) //초기화
         {
             condition.ResetCondition();
         }
@@ -14,13 +14,13 @@ public class PlayerCondition : MonoBehaviour, IDamageable
 
     private void Update()
     {
-        foreach (ConditionData condition in conditions)
+        foreach (ConditionData condition in conditions) //초당 회복
         {
             condition.Add(condition.passiveValue * Time.deltaTime);
         }
     }
 
-    public ConditionData GetCondition(ConditionType type)
+    public ConditionData GetCondition(ConditionType type) //플레이어 상태 변화시 호출
     {
         foreach (ConditionData condition in conditions)
         {
@@ -33,7 +33,7 @@ public class PlayerCondition : MonoBehaviour, IDamageable
         return null;
     }
 
-    public void Damage(ConditionType type, float damage)
+    public void Damage(ConditionType type, float damage) //데미지
     {
         foreach (ConditionData condition in conditions)
         {

@@ -7,11 +7,11 @@ public class JumperObject : MonoBehaviour
 
     public void OnCollisionEnter(Collision other)
     {
-        if (other.gameObject.CompareTag("Player"))
+        if (other.gameObject.CompareTag("Player")) //플레이어 일 때만
         {
             _rigidbody = other.gameObject.GetComponent<Rigidbody>();
-            
-            if (other.relativeVelocity.y < -1f) //플레이어가 밑으로 내려온 상황에만 점프시킨다.
+
+            if (other.relativeVelocity.y < 0f && other.transform.position.y > transform.position.y) //플레이어가 위에서 내려온 경우 일 때만
             {
                 _rigidbody.AddForce(Vector2.up * (jumpPower), ForceMode.Impulse);
             }

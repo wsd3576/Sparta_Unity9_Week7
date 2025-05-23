@@ -7,23 +7,26 @@ public class PlayerController : MonoBehaviour
 {
     private PlayerCondition playerCondition;
     private PlayerInteraction playerInteraction;
-    private ConditionData stamina;
+    private Rigidbody _rigidbody;
     
-    [Header("Movement")]
+    public ConditionData stamina;
+    
+    [Header("Movement")] //기본이동
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private float sprintSpeed = 1.5f;
     [SerializeField] private float jumpForce = 100f;
+    
     [SerializeField] private LayerMask groundLayerMask;
     
     private Vector2 curMovementInput;
     
-    [Header("Movement Plus")]
+    [Header("Movement Plus")] //스태미너 소비
     [SerializeField] private float sprintStamina = 10f;
     [SerializeField] private float jumpStamina = 10f;
     
     private bool isSprinting = false;
 
-    [Header("Look")]
+    [Header("Look")] //화면 회전 설정
     [SerializeField] private float minXLook = -85f;
     [SerializeField] private float maxXLook = 85f;
     [SerializeField] private float lookSensitivity = 0.5f;
@@ -37,22 +40,21 @@ public class PlayerController : MonoBehaviour
     //3인칭 전환
     [SerializeField] private Transform fpsCameraTarget;
     [SerializeField] private Transform tpsCameraTarget;
+    
     [SerializeField] private LayerMask thirdPersonCullingMask;
     [SerializeField] private LayerMask firstPersonCullingMask;
     
-    
-    private float smoothSpeed = 10f;
+    private float smoothSpeed = 5f;
     private bool isThirdPerson = false;
     
     private Transform currentCameraTarget;
     
+    //아이템 사용 관련
     private float bonusSpeed = 0f;
     private float bonusJumpForce = 0f;
     
     private Coroutine speedUpCoroutine;
     private Coroutine jumpBoostCoroutine;
-    
-    private Rigidbody _rigidbody;
     
     private readonly Dictionary<string, int> itemButtonMap = new()
     {
@@ -67,7 +69,6 @@ public class PlayerController : MonoBehaviour
         camera = Camera.main;
         cameraContainer = GetComponentInChildren<Camera>().transform.parent.transform;
         _rigidbody = GetComponent<Rigidbody>();
-        camera.cullingMask = firstPersonCullingMask;
     }
     
     private void Start()
@@ -77,15 +78,16 @@ public class PlayerController : MonoBehaviour
         
         Cursor.lockState = CursorLockMode.Locked;
         currentCameraTarget = fpsCameraTarget;
+        camera.cullingMask = firstPersonCullingMask;
     }
 
     private void Update()
     {
-        stamina = playerCondition.GetCondition(ConditionType.Stamina);
         if (isSprinting)
         {
             stamina.Subtract(Time.deltaTime * sprintStamina);
         }
+        
         if (stamina.curValue <= 0f || stamina.exhausted)
         {
             isSprinting = false;
@@ -94,12 +96,20 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        camera.transform.position = Vector3.Lerp
-        (
-            camera.transform.position,
-            currentCameraTarget.position,
-            Time.deltaTime * smoothSpeed
-        );
+        //3인칭 전환 부드러운 이동
+        if (Vector3.Distance(camera.transform.position, currentCameraTarget.position) > 0.01f)
+        {
+            camera.transform.position = Vector3.Lerp
+            (
+                camera.transform.position,
+                currentCameraTarget.position,
+                Time.deltaTime * smoothSpeed
+            );
+        }
+        else
+        {
+            camera.transform.position = currentCameraTarget.position;
+        }
         
         Move();
     }
@@ -211,18 +221,9 @@ public class PlayerController : MonoBehaviour
         }
     }
     
-    public void OnToggleView(InputAction.CallbackContext context)
+    public void ItemBoost(ItemDataConsumable item) //속도 혹은 점프 증가 아이템 사용시 호출
     {
-        if (context.phase == InputActionPhase.Started)
-        {
-            isThirdPerson = !isThirdPerson;
-            currentCameraTarget = isThirdPerson ? tpsCameraTarget : fpsCameraTarget;
-            camera.cullingMask = isThirdPerson ? thirdPersonCullingMask : firstPersonCullingMask;
-        }
-    }
-    
-    public void ItemBoost(ItemDataConsumable item)
-    {
+        //각각 중복되는 효과시 기존의 효과 코루틴을 종료시키고 새로운 코루틴 시작
         switch (item.type)
         {
             case ConsumableType.SpeedUp:
@@ -258,6 +259,14 @@ public class PlayerController : MonoBehaviour
         yield return new WaitForSeconds(duration);
         bonusJumpForce = 0f;
     }
-
-
+    
+    public void OnToggleView(InputAction.CallbackContext context)
+    {
+        if (context.phase == InputActionPhase.Started)
+        {
+            isThirdPerson = !isThirdPerson;
+            currentCameraTarget = isThirdPerson ? tpsCameraTarget : fpsCameraTarget;
+            camera.cullingMask = isThirdPerson ? thirdPersonCullingMask : firstPersonCullingMask;
+        }
+    }
 }
