@@ -118,7 +118,6 @@ public class PlayerInteraction : MonoBehaviour
     public void UseItem(int index)
     {
         if (index >= items.Count) return;
-        Debug.Log($"{index}");
         if (items[index].itemData.type == ItemType.Consumable)
         {
             items[index].quantity--;
